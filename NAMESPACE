@@ -1,0 +1,32 @@
+export(metaplus)
+export(summary.metaplus)
+export(test.outliers)
+export(outlier.probs)
+
+importFrom(stats, AIC)
+importFrom(stats, BIC)
+importFrom(bbmle, logLik)
+importFrom(bbmle, summary)
+importFrom(bbmle, mle2)
+importFrom(bbmle, "parnames<-")
+
+importFrom(methods,setMethod)
+
+import(boot,metafor)
+
+importFrom(numDeriv,hessian)
+
+# S3 methods
+S3method(plot, metaplus)
+S3method(summary, metaplus)
+S3method(logLik, metaplus)
+S3method(AIC, metaplus)
+S3method(BIC, metaplus)
+S3method(test.outliers, metaplus)
+S3method(outlier.probs, metaplus)
+S3method(print, summary.metaplus)
+
+S3method(summary, test.outliers)
+S3method(print, summary.test.outliers)
+
+S3method(plot,outlier.probs)

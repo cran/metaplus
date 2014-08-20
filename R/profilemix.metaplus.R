@@ -1,0 +1,134 @@
+profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=NULL) {
+  
+  isreg <- !is.null(mods)
+  
+  if (isreg) mods <- as.matrix(mods)
+  
+  ll.profilemix <- function(par,yi,sei,mods) {
+    isreg <- !missing(mods)
+    muhat <- par[1]
+    tau2 <- par[2]
+    tau2out <- par[3]
+    lpoutlier <- par[4]
+    if (isreg) xcoef <- matrix(par[5:length(par)],ncol=1)
+    poutlier <- exp(lpoutlier)/(1+exp(lpoutlier))
+    w <- 1.0/(tau2+sei^2)
+    if (isreg) ll1 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)+log(1-poutlier)
+    else ll1 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)+log(1-poutlier)
+    w <- 1.0/(tau2out+sei^2)
+    if (isreg) ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)+log(poutlier)
+    else ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)+log(poutlier)
+    l <- exp(cbind(ll1,ll2))
+    negll <- -sum(log(apply(l,1,sum)))
+   if (is.nan(negll)) negll <- NA
+    if (!is.finite(negll)) negll <- NA
+return(negll)
+  }
+  
+  
+  # obtain starting values
+  if (isreg) {
+    start.meta <- makestart.profilemix.metaplus(yi,sei, mods)$params
+    start.val <- c(start.meta$muhat,start.meta$tau2,start.meta$tau2out,start.meta$lpoutlier,start.meta$xcoef)
+    lower.val <- c(-Inf,0.0,0.0,-Inf,rep(-Inf,dim(mods)[2]))
+  } else {
+    start.meta <- makestart.profilemix.metaplus(yi,sei)$params
+    start.val <- c(start.meta$muhat,start.meta$tau2,start.meta$tau2out,start.meta$lpoutlier)
+    lower.val <- c(-Inf,0.0,0.0,-Inf)
+  }     
+  thenames <- c("muhat","tau2","tau2out","lpoutlier")
+  if (isreg)  thenames <- c(thenames,dimnames(mods)[[2]])
+  names(start.val) <- thenames
+  names(lower.val) <- names(start.val)
+  parnames(ll.profilemix) <- names(start.val)
+  
+  if (isreg) profilemix.fit <- suppressWarnings(mle2(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="nlminb",
+                                    skip.hessian=TRUE,
+                                    data=list(yi=yi,sei=sei,mods=mods),
+                                    lower=lower.val))
+  else profilemix.fit <- suppressWarnings(mle2(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="nlminb",
+                              skip.hessian=TRUE,
+                              data=list(yi=yi,sei=sei),
+                              lower=lower.val))
+  
+  results <- profilemix.fit@coef
+  # calculate final posterior probabilities
+  muhat <- results[1]
+  tau2 <- results[2]
+  tau2out <- results[3]
+  lpoutlier <- results[4]
+  if (isreg) xcoef <- matrix(results[5:length(results)],ncol=1)
+
+  poutlier <- exp(lpoutlier)/(1+exp(lpoutlier))
+  
+  w <- 1.0/(tau2+sei^2)
+  if (isreg) ll1 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
+  else ll1 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)
+  w <- 1.0/(tau2out+sei^2)
+  if (isreg) ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
+  else ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)
+  p <- c(1-poutlier,poutlier)
+  l <- exp(cbind(ll1,ll2))
+  
+  prop <- t(p*t(l))/apply(t(p*t(l)),1,sum)
+ 
+  results <- profilemix.fit@coef
+
+  if (!justfit)  {
+    results <- profilemix.fit@coef
+    if (isreg) thehessian <- hessian(ll.profilemix,results,yi=yi,sei=sei,mods=mods)
+    else thehessian <- hessian(ll.profilemix,results,yi=yi,sei=sei)
+    isproblem <- as.numeric(is.nan(diag(thehessian)) | (diag(thehessian)==0.0))
+    isproblem2 <- isproblem*(1:length(results))
+    noproblem2 <- (1-isproblem)*(1:length(results))
+    if (all(isproblem2==0)) thehessian2 <- thehessian
+    else thehessian2 <- thehessian[-isproblem2,-isproblem2]
+    themyse <- suppressWarnings(sqrt(diag(solve(thehessian2))))
+    # expand back to original length
+    myse <- rep(0,length(results))
+    myse[noproblem2] <- themyse
+    if (isreg) whichp <- c(1,5:(4+dim(mods)[2]))
+    else whichp <- 1
+    profilemix.stderr <- ifelse(is.nan(myse),0.0,myse)
+    profilemix.profile <- suppressWarnings(profilemix.profile(profilemix.fit,which=whichp,std.err=profilemix.stderr))
+    profilemix.ci <- confint(profilemix.profile,method="uniroot")
+    if (plotci) plot(profilemix.profile)
+    
+    theci <- matrix(rep(NA,length(profilemix.fit@coef)*2),ncol=2)
+    theci[whichp,] <- profilemix.ci
+    results <- cbind(results,theci)
+    
+    pvalues <- rep(NA,length(start.val))
+    for (iparm in whichp) {
+      fixedparm <- names(start.val)[iparm]
+      if (isreg) dostart <- paste("newstart.meta <- suppressWarnings(makestart.profilemix.metaplus(yi,sei, mods,",
+                                  "fixed=list(",fixedparm,"=0.0)))$params","\n",sep="")
+      else dostart <- paste("newstart.meta <- suppressWarnings(makestart.profilemix.metaplus(yi,sei, NULL,",
+                            "fixed=list(",fixedparm,"=0.0)))$params","\n",sep="")
+      eval(parse(text=dostart))
+      if (isreg) newstart.val <- c(newstart.meta$muhat,newstart.meta$tau2,newstart.meta$tau2out,newstart.meta$lpoutlier,newstart.meta$xcoef)
+      else newstart.val <- c(newstart.meta$muhat,newstart.meta$tau2,newstart.meta$tau2out,newstart.meta$lpoutlier)
+      names(newstart.val) <- names(start.val)
+      newstart.val <- newstart.val[-iparm]
+      newlower.val <- lower.val[-iparm]
+      if (isreg) doprofile <- paste("profilemix.fit0 <- suppressWarnings(mle2(ll.profilemix,start=newstart.val,vecpar=TRUE,\n",
+                                    "optimizer=\"nlminb\",data=list(yi=yi,sei=sei,mods=mods),\n",
+                                    "skip.hessian=TRUE,\n",
+                                    "lower=newlower.val,fixed=list(",fixedparm,"=0.0)))",sep="")
+      else doprofile <- paste("profilemix.fit0 <- suppressWarnings(mle2(ll.profilemix,start=newstart.val,vecpar=TRUE,\n",
+                              "optimizer=\"nlminb\",data=list(yi=yi,sei=sei),\n",
+                              "skip.hessian=TRUE,\n",
+                              "lower=newlower.val,fixed=list(",fixedparm,"=0.0)))",sep="")
+      eval(parse(text=doprofile))
+      pvalues[iparm] <- anova(profilemix.fit,profilemix.fit0)[2,5]
+    }
+    results <- cbind(results,pvalues)
+    dimnames(results)[[2]] <- c("Est.","ci.lb","ci.ub","pvalue")
+    # transform lpoutlier to poutlier
+    dimnames(results)[[1]][4] <- "Outlier prob."
+    results[4,1] <- 1.0/(1+exp(-results[4,1]))
+  }
+  
+  return(list(results=results,yi=yi,sei=sei,mods=mods,slab=slab,fittedmodel=profilemix.fit,
+              outlier.prob=prop[,2],justfit=justfit,random="mixture"))
+}

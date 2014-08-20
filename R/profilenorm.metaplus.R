@@ -1,0 +1,95 @@
+profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=NULL) {
+  
+  isreg <- !is.null(mods)
+  
+  ll.profilenorm <- function(par,yi,sei,mods) {
+    isreg <- !missing(mods)
+    muhat <- par[1]
+    tau2 <- par[2]
+    if (isreg) xcoef <- par[3:length(par)]
+    w <- 1.0/(tau2+sei^2)
+    if (isreg) negll <- 0.5*sum(log(2*pi)+log(1/w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
+    else negll <- 0.5*sum(log(2*pi)+log(1/w)+w*(yi-muhat)^2)
+    if (is.nan(negll)) negll <- NA
+    if (!is.finite(negll)) negll <- NA
+    return(negll)
+  }
+  
+  # obtain starting values
+  
+  if (isreg) {
+    start.meta <- rma(yi=yi, sei=sei, mods=as.data.frame(mods), method="DL")
+    start.val <- c(start.meta$b[1,1],start.meta$tau2,start.meta$b[2:dim(start.meta$b)[1],1])
+    lower.val <- c(-Inf,0.0,rep(-Inf,dim(mods)[2]))
+  } else {
+    start.meta <- rma(yi=yi, sei=sei, method="DL")
+    start.val <- c(start.meta$b[1,1],start.meta$tau2)
+    lower.val <- c(-Inf,0.0)
+  }
+  if (isreg) names(start.val) <- c("muhat","tau2",dimnames(mods)[[2]])
+  else names(start.val) <- c("muhat","tau2")
+  
+  parnames(ll.profilenorm) <- names(start.val)
+  
+  names(lower.val) <- names(start.val)
+  
+  start.val <- start.val+0.001
+  
+  if (isreg) profilenorm.fit <- suppressWarnings(mle2(ll.profilenorm,start=start.val,vecpar=TRUE,
+                                   optimizer="nlminb",data=list(yi=yi,sei=sei,mods=as.matrix(mods)),
+                                   skip.hessian=TRUE,
+                                   control=list(eval.max=1000),
+                                   lower=lower.val))
+  else profilenorm.fit <- suppressWarnings(mle2(ll.profilenorm,start=start.val,vecpar=TRUE,
+                             optimizer="nlminb",data=list(yi=yi,sei=sei),
+                             skip.hessian=TRUE,
+                             control=list(eval.max=1000),
+                             lower=lower.val))
+  
+  if (profilenorm.fit@details$convergence!=0) warning("convergence failed")
+  
+  results <- profilenorm.fit@coef
+  
+  if (!justfit)  {
+    if (isreg) myse <- sqrt(diag(solve(hessian(ll.profilenorm,results,yi=yi,sei=sei,mods=as.matrix(mods)))))
+    else myse <- sqrt(diag(solve(hessian(ll.profilenorm,results,yi=yi,sei=sei))))
+    
+    if (isreg) whichp <- c(1,3:(2+dim(mods)[2]))
+    else whichp <- 1
+    profilenorm.profile <- profile(profilenorm.fit,which=whichp,std.err=myse)
+    profilenorm.ci <- confint(profilenorm.profile,method="uniroot")
+    if (plotci) plot(profilenorm.profile)
+    
+    theci <- matrix(rep(NA,length(profilenorm.fit@coef)*2),ncol=2)
+    theci[whichp,] <- profilenorm.ci
+    results <- cbind(results,theci)
+    
+    # obtain p value for each coefficient
+    pvalues <- rep(NA,length(start.val))
+    for (iparm in whichp) {
+      fixedparm <- names(start.val)[iparm]
+      if (isreg) dostart <- paste("profilenorm.start <- makestart.profilenorm.metaplus(yi=yi,sei=sei,mods=as.matrix(mods),\n",
+                                  "fixed=list(",fixedparm,"=0.0))",sep="")
+      else dostart <- paste("profilenorm.start <- makestart.profilenorm.metaplus(yi=yi,sei=sei,\n",
+                            "fixed=list(",fixedparm,"=0.0))",sep="")
+      eval(parse(text=dostart))
+      newstart.val <-  unlist(profilenorm.start)
+      newstart.val <- newstart.val[names(start.val)]
+      newstart.val <-  newstart.val[-iparm]
+      newlower.val <- lower.val[-iparm]
+      if (isreg) doprofile <- paste("profilenorm.fit0 <- suppressWarnings(mle2(ll.profilenorm,start=newstart.val,vecpar=TRUE,\n",
+                                    "optimizer=\"nlminb\",data=list(yi=yi,sei=sei,mods=as.matrix(mods)),\n",
+                                    "skip.hessian=TRUE,\n",
+                                    "lower=newlower.val,fixed=list(",fixedparm,"=0.0)))",sep="")
+      else doprofile <- paste("profilenorm.fit0 <- suppressWarnings(mle2(ll.profilenorm,start=newstart.val,vecpar=TRUE,\n",
+                              "optimizer=\"nlminb\",data=list(yi=yi,sei=sei),\n",
+                              "skip.hessian=TRUE,\n",
+                              "lower=newlower.val,fixed=list(",fixedparm,"=0.0)))",sep="")
+      eval(parse(text=doprofile))
+      pvalues[iparm] <- anova(profilenorm.fit,profilenorm.fit0)[2,5]
+    }
+    results <- cbind(results,pvalues)
+    dimnames(results)[[2]] <- c("Est.","ci.lb","ci.ub","pvalue")
+  }
+  return(list(results=results,yi=yi,sei=sei,mods=mods,slab=slab,justfit=justfit,fittedmodel=profilenorm.fit,random="normal"))
+}
