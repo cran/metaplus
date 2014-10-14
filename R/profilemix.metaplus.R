@@ -52,6 +52,12 @@ return(negll)
                               lower=lower.val))
   
   results <- profilemix.fit@coef
+  if (profilemix.fit@details$convergence!=0) {
+#    if (((profilemix.fit@details$message=="singular convergence (7)") & (profilet.fit@coef[3]<1e-6)) |
+    if  (!(profilemix.fit@details$message=="false convergence (8)")) {
+      warning(paste("convergence failed: ",profilemix.fit@details$message,sep=""))
+    }    
+  }
   # calculate final posterior probabilities
   muhat <- results[1]
   tau2 <- results[2]

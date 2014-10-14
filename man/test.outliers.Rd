@@ -6,7 +6,7 @@
 Tests for the presence of outliers.
 }
 \description{
-For the $t$-distribution models this is a test that the degrees of freedom is infinitite, or equivalently that it's inverse is zero. For the mixture-normal model it is a test that the proportion of outliers is zero. As both tests involve a parameter on the boundary of the parameter space, asymptotic theory does not apply, so a parametric bootstrap is performed to determine the empirical distribution of the test statistic under the null hypothesis. The observed likelihood ratio statistic is then compared to this distribution to determine the p value.
+For the \eqn{t}-distribution models this is a test that the degrees of freedom is infinitite, or equivalently that it's inverse is zero. For the mixture-normal model it is a test that the proportion of outliers is zero. As both tests involve a parameter on the boundary of the parameter space, asymptotic theory does not apply, so a parametric bootstrap is performed to determine the empirical distribution of the test statistic under the null hypothesis. The observed likelihood ratio statistic is then compared to this distribution to determine the p value.
 }
 \usage{
 test.outliers(object, R = 999)

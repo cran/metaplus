@@ -54,16 +54,26 @@ setMethod("profilet.profile", "mle2",
               if (is.null(call$fixed)) call$fixed <- fix
               else call$fixed <- c(eval(call$fixed),fix)
               start <- makestart.profilenorm.metaplus(call$data$yi,call$data$sei,mods=call$data$mods,fixed=call$fixed)
-              if (length(start) >= 3) start <- c(start[1:2],vinv=0.5,start[3:length(start)])
-              else start <- c(start,vinv=0.5)
-              start <- start[-i]
-              call$start <- start
-              if (skiperrs) {
-                pfit <- try(eval.parent(call, 2L), silent=TRUE)
-              } else {
-                pfit <- eval.parent(call, 2L)
+              maxll <- -Inf
+              for (vinv in c(0.0,0.01,0.05,0.1,0.2,0.5,1)) { 
+                if (length(start) >= 3) start <- c(start[1:2],vinv=vinv,start[3:length(start)])
+                else start <- c(start,vinv=vinv)
+                names(start) <- names(coef(fitted))
+                start <- start[-i]
+                call$start <- start
+                if (skiperrs) {
+                  pfit <- try(eval.parent(call, 2L), silent=TRUE)
+                } else {
+                  pfit <- eval.parent(call, 2L)
+                }
+                
+                if (logLik(pfit) > maxll) {
+                  maxfit <- pfit
+                  maxll <- logLik(pfit)
+                }
               }
-              #if (i==5) print(pfit@min)
+              pfit <- maxfit              
+              
               ok <- ! inherits(pfit,"try-error")
               if (debug && ok) cat(coef(pfit),-logLik(pfit),"\n")
               if(skiperrs && !ok) {

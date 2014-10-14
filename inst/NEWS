@@ -1,0 +1,13 @@
+Changes in metaplus version 0.6-1
+
+  o improve profiling of t-distribution models by using multiple starting values
+
+  o fix problem when vinv=0 correctly
+
+  o fix documentation errors
+
+  o include examples vignette
+
+Changes in metaplus version 0.6-0
+
+  o initial release

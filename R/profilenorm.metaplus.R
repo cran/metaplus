@@ -46,7 +46,7 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
                              control=list(eval.max=1000),
                              lower=lower.val))
   
-  if (profilenorm.fit@details$convergence!=0) warning("convergence failed")
+  if (profilenorm.fit@details$convergence!=0) warning(paste("convergence failed: ",profilenorm.fit@details$message,sep=""))
   
   results <- profilenorm.fit@coef
   

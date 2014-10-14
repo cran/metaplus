@@ -158,7 +158,6 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
           print("failed")
           warning(e)
           return(NULL)})
-      #if ((length(fitted$logLik)==0) | (length(currll)==0)) browser()
       if (fitted$logLik > currll) {
         currll <- fitted$logLik
         curroutlier <- ioutlier

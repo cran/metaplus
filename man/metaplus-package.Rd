@@ -5,7 +5,7 @@
 Fits random effects meta-analysis models including robust models
 }
 \description{
-Allows fitting of random effects meta-analysis producing confidence intervals based on profile likelihood (Hardy and Thompson, 1996). Two methods of robust meta-analysis are included, based on either the $t$-distribution (Baker and Jackson (2008) and Lee and Thompson (2008)) or normal-mixture distribution (Beath, 2014). Tests can be performed for the need for a robust model, using a parametric bootstrap, and for the normal-mixture the identity of the outliers using the posterior probability. Plots are produced allowing a comparison between the results of each method. Where possible use has been made of the metafor package.
+Allows fitting of random effects meta-analysis producing confidence intervals based on profile likelihood (Hardy and Thompson, 1996). Two methods of robust meta-analysis are included, based on either the \eqn{t}-distribution (Baker and Jackson (2008) and Lee and Thompson (2008)) or normal-mixture distribution (Beath, 2014). Tests can be performed for the need for a robust model, using a parametric bootstrap, and for the normal-mixture the identity of the outliers using the posterior probability. Plots are produced allowing a comparison between the results of each method. Where possible use has been made of the metafor package.
 
 Future enhancements include the addition of binary meta-analysis using a likelihoiod approach with confidence intervals from profile likelihood.
 }
