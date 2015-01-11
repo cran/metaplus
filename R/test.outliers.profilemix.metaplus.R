@@ -14,7 +14,8 @@ test.outliers.profilemix.metaplus <- function(object,R=999) {
     if (abs((logLik(betadata.meta2)-logLik(betadata.meta))/logLik(betadata.meta))<1.0e-4) sim.chisq <- 0
     else sim.chisq <- 2*(logLik(betadata.meta2)-logLik(betadata.meta))
     if (sim.chisq < 0) {
-      warning(paste("chisq< 0","is",sim.chisq))
+      #browser()
+      warning(paste("mixture chisq< 0","is",sim.chisq))
       sim.chisq <- 0
     }
     return(sim.chisq)

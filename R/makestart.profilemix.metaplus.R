@@ -87,14 +87,15 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
         startvals <- c(currmuhat,currtau2,currtau2out)
         names(startvals) <- c("muhat","tau2","tau2out")
       }
-      if (isreg) results.nlm <-nlminb(startvals,optimrl2reg,
+      # ????? convert to Nelder_mead
+      if (isreg) results.nlm <- nlminb(startvals,optimrl2reg,
                                       #               control=list(trace=6),
                                       lower = c(-Inf,0,0,rep(-Inf,ncoef)),
                                       lpoutlier=currlpoutlier,
                                       prop=prop,
                                       yi=yi,sei=sei,mods=mods,
                                       isreg=isreg,fixed=fixed)
-      else results.nlm <-nlminb(startvals,optimrl2reg,
+      else results.nlm <- nlminb(startvals,optimrl2reg,
                                 #               control=list(trace=6),
                                 lower = c(-Inf,0,0),
                                 lpoutlier=currlpoutlier,
@@ -158,6 +159,7 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
           print("failed")
           warning(e)
           return(NULL)})
+      #if ((length(fitted$logLik)==0) | (length(currll)==0)) browser()
       if (fitted$logLik > currll) {
         currll <- fitted$logLik
         curroutlier <- ioutlier

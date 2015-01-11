@@ -35,27 +35,27 @@ makestart.profilenorm.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
 
   parnames(ll.profilenorm) <- names(start.val)
   
-  thefixed <- unlist(fixed)
-  if (length(thefixed)>0) {
-    fixedparms <- (1:length(start.val))[names(start.val)==names(thefixed)]
-    start.val <- start.val[-fixedparms]
-    lower.val <- lower.val[-fixedparms]
-  }
+#  thefixed <- unlist(fixed)
+#  if (length(thefixed)>0) {
+#    fixedparms <- (1:length(start.val))[names(start.val)==names(thefixed)]
+#    start.val <- start.val[-fixedparms]
+#    lower.val <- lower.val[-fixedparms]
+#  }
   
   names(lower.val) <- names(start.val)
   
   start.val <- start.val+0.001
   
-  if (isreg) profilenorm.fit <- suppressWarnings(mle2(ll.profilenorm,start=start.val,vecpar=TRUE,
-                                   optimizer="nlminb",data=list(yi=yi,sei=sei,mods=as.matrix(mods)),
+  if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
+                                   optimizer="user",optimfun=myoptim,data=list(yi=yi,sei=sei,mods=as.matrix(mods)),
                                    skip.hessian=TRUE,
                                    lower=lower.val,
-                                   fixed=fixed))
-  else profilenorm.fit <- suppressWarnings(mle2(ll.profilenorm,start=start.val,vecpar=TRUE,
-                             optimizer="nlminb",data=list(yi=yi,sei=sei),
+                                   fixed=fixed)
+  else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
+                            optimizer="user",optimfun=myoptim,data=list(yi=yi,sei=sei),
                              skip.hessian=TRUE,
                              lower=lower.val,
-                             fixed=fixed))
+                             fixed=fixed)
   
   results <- c(as.list(profilenorm.fit@coef),fixed)
  if (!is.null(fixed)) {

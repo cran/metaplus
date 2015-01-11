@@ -5,18 +5,14 @@ export(outlier.probs)
 
 importFrom(stats, AIC)
 importFrom(stats, BIC)
-importFrom(bbmle, logLik)
-importFrom(bbmle, summary)
-importFrom(bbmle, mle2)
-importFrom(bbmle, "parnames<-")
 
 importFrom(methods,setMethod)
 
-import(boot,metafor)
+import(boot,metafor,bbmle)
 
 importFrom(numDeriv,hessian)
+importFrom(lme4,Nelder_Mead)
 
-# S3 methods
 S3method(plot, metaplus)
 S3method(summary, metaplus)
 S3method(logLik, metaplus)

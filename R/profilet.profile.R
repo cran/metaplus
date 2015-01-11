@@ -16,7 +16,7 @@ setGeneric("profilet.profile", function(fitted, which = 1:p, maxsteps = 100,
                                           try_harder=FALSE, ...)
                                           		{ standardGeneric("profilet.profile")})
 
-setMethod("profilet.profile", "mle2",
+setMethod("profilet.profile", "mymle",
           function (fitted, which = 1:p, maxsteps = 100,
                     alpha = 0.01, zmax = sqrt(qchisq(1 - alpha/2, p)),
                     del = zmax/5, trace = FALSE, skiperrs=TRUE,
@@ -53,20 +53,24 @@ setMethod("profilet.profile", "mle2",
               names(fix) <- p.i
               if (is.null(call$fixed)) call$fixed <- fix
               else call$fixed <- c(eval(call$fixed),fix)
-              start <- makestart.profilenorm.metaplus(call$data$yi,call$data$sei,mods=call$data$mods,fixed=call$fixed)
+              save.start <- makestart.profilenorm.metaplus(call$data$yi,call$data$sei,mods=call$data$mods,fixed=call$fixed)
               maxll <- -Inf
               for (vinv in c(0.0,0.01,0.05,0.1,0.2,0.5,1)) { 
+                start <- save.start
                 if (length(start) >= 3) start <- c(start[1:2],vinv=vinv,start[3:length(start)])
                 else start <- c(start,vinv=vinv)
-                names(start) <- names(coef(fitted))
-                start <- start[-i]
+                #browser()
+                #start <- start[-i]
                 call$start <- start
+                #browser()
                 if (skiperrs) {
                   pfit <- try(eval.parent(call, 2L), silent=TRUE)
                 } else {
                   pfit <- eval.parent(call, 2L)
                 }
                 
+                #print(profilet.fit)
+                #browser()
                 if (logLik(pfit) > maxll) {
                   maxfit <- pfit
                   maxll <- logLik(pfit)
@@ -119,6 +123,7 @@ setMethod("profilet.profile", "mle2",
             } ## end onestep
             ## Profile the likelihood around its maximum
             ## Based on profile.glm in MASS
+            #browser()
              summ <- summary(fitted)
             if (missing(std.err)) {
               std.err <- summ@coef[, "Std. Error"]
@@ -151,7 +156,7 @@ setMethod("profilet.profile", "mle2",
             ndeps <- eval.parent(call$control$ndeps)
             parscale <- eval.parent(call$control$parscale)
             nc <- length(fitted@coef)
-            xf <- function(x) rep(x,length.out=nc) ## expand to length
+            xf <- function(x) if (is.null(x)) NULL else rep(x,length.out=nc) ## expand to length
             upper <- xf(unlist(eval.parent(call$upper)))
             lower <- xf(unlist(eval.parent(call$lower)))
             if (all(upper==Inf & lower==-Inf)) {
@@ -170,12 +175,6 @@ setMethod("profilet.profile", "mle2",
               pvi <- pv0
               p.i <- Pnames[i]
               wfun <- function(txt) paste(txt," (",p.i,")",sep="")
-              ## omit values from control vectors:
-              ##   is this necessary/correct?
-              if (!is.null(ndeps)) call$control$ndeps <- ndeps[-i]
-              if (!is.null(parscale)) call$control$parscale <- parscale[-i]
-              if (!is.null(upper) && length(upper)>1) call$upper <- upper[-i]
-              if (!is.null(lower) && length(lower)>1) call$lower <- lower[-i]
               stop_msg[[i]] <- list(down="",up="")
               for (sgn in c(-1, 1)) {
                 dir_ind <- (sgn+1)/2+1 ## (-1,1) -> (1,2)
@@ -280,7 +279,7 @@ setMethod("profilet.profile", "mle2",
               prof[[p.i]] <- data.frame(z = zi[si])
               prof[[p.i]]$par.vals <- pvi[si,, drop=FALSE]
             } ## for i in which
-            newprof <- new("profile.mle2", profile = prof, summary = summ)
+            newprof <- new("profile.mymle", profile = prof, summary = summ)
             attr(newprof,"stop_msg") <- stop_msg
             newprof
           })

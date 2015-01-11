@@ -51,6 +51,7 @@ For the mixture normal model, multiple starting values are used. This is achieve
 \item{slab}{Study labels}
 \item{justfit}{Value of justfit passed to the method.}
 \item{fittedmodel}{final model returned by mle2}
+\item{random}{Type of random effect}
 \item{outlier.prob}{Outlier probabilities for robust mixture model only}
 }
 \references{

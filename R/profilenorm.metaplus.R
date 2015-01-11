@@ -35,27 +35,31 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
   
   start.val <- start.val+0.001
   
-  if (isreg) profilenorm.fit <- suppressWarnings(mle2(ll.profilenorm,start=start.val,vecpar=TRUE,
-                                   optimizer="nlminb",data=list(yi=yi,sei=sei,mods=as.matrix(mods)),
+  if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
+                                   optimizer="user",optimfun=myoptim,data=list(yi=yi,sei=sei,mods=as.matrix(mods)),
                                    skip.hessian=TRUE,
                                    control=list(eval.max=1000),
-                                   lower=lower.val))
-  else profilenorm.fit <- suppressWarnings(mle2(ll.profilenorm,start=start.val,vecpar=TRUE,
-                             optimizer="nlminb",data=list(yi=yi,sei=sei),
+                                   lower=lower.val)
+  else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
+                             optimizer="user",optimfun=myoptim,data=list(yi=yi,sei=sei),
                              skip.hessian=TRUE,
                              control=list(eval.max=1000),
-                             lower=lower.val))
+                             lower=lower.val)
   
-  if (profilenorm.fit@details$convergence!=0) warning(paste("convergence failed: ",profilenorm.fit@details$message,sep=""))
+  if (profilenorm.fit@details$convergence!=0) warning(paste("convergence failed: ",profilenorm.fit@details$message,sep="",))
   
   results <- profilenorm.fit@coef
   
   if (!justfit)  {
-    if (isreg) myse <- sqrt(diag(solve(hessian(ll.profilenorm,results,yi=yi,sei=sei,mods=as.matrix(mods)))))
-    else myse <- sqrt(diag(solve(hessian(ll.profilenorm,results,yi=yi,sei=sei))))
+    if (isreg) myse <- suppressWarnings(sqrt(diag(solve(hessian(ll.profilenorm,results,yi=yi,sei=sei,mods=as.matrix(mods))))))
+    else myse <- suppressWarnings(sqrt(diag(solve(hessian(ll.profilenorm,results,yi=yi,sei=sei)))))
+
+      myse <- ifelse(is.nan(myse),0.0,myse)
+      #browser()
     
     if (isreg) whichp <- c(1,3:(2+dim(mods)[2]))
     else whichp <- 1
+    #browser()
     profilenorm.profile <- profile(profilenorm.fit,which=whichp,std.err=myse)
     profilenorm.ci <- confint(profilenorm.profile,method="uniroot")
     if (plotci) plot(profilenorm.profile)
@@ -75,16 +79,17 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
       eval(parse(text=dostart))
       newstart.val <-  unlist(profilenorm.start)
       newstart.val <- newstart.val[names(start.val)]
-      newstart.val <-  newstart.val[-iparm]
-      newlower.val <- lower.val[-iparm]
-      if (isreg) doprofile <- paste("profilenorm.fit0 <- suppressWarnings(mle2(ll.profilenorm,start=newstart.val,vecpar=TRUE,\n",
-                                    "optimizer=\"nlminb\",data=list(yi=yi,sei=sei,mods=as.matrix(mods)),\n",
+#      newstart.val <-  newstart.val[-iparm]
+#      newlower.val <- lower.val[-iparm]
+		newlower.val <- lower.val
+      if (isreg) doprofile <- paste("profilenorm.fit0 <- mymle(ll.profilenorm,start=newstart.val,vecpar=TRUE,\n",
+                                    "optimizer=\"user\",optimfun=myoptim,data=list(yi=yi,sei=sei,mods=as.matrix(mods)),\n",
                                     "skip.hessian=TRUE,\n",
-                                    "lower=newlower.val,fixed=list(",fixedparm,"=0.0)))",sep="")
-      else doprofile <- paste("profilenorm.fit0 <- suppressWarnings(mle2(ll.profilenorm,start=newstart.val,vecpar=TRUE,\n",
-                              "optimizer=\"nlminb\",data=list(yi=yi,sei=sei),\n",
+                                    "lower=newlower.val,fixed=list(",fixedparm,"=0.0))",sep="")
+      else doprofile <- paste("profilenorm.fit0 <- mymle(ll.profilenorm,start=newstart.val,vecpar=TRUE,\n",
+                              "optimizer=\"user\",optimfun=myoptim,data=list(yi=yi,sei=sei),\n",
                               "skip.hessian=TRUE,\n",
-                              "lower=newlower.val,fixed=list(",fixedparm,"=0.0)))",sep="")
+                              "lower=newlower.val,fixed=list(",fixedparm,"=0.0))",sep="")
       eval(parse(text=doprofile))
       pvalues[iparm] <- anova(profilenorm.fit,profilenorm.fit0)[2,5]
     }

@@ -4,7 +4,7 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
   
   if (isreg) mods <- as.matrix(mods)
   
-  ll.profilemix <- function(par,yi,sei,mods) {
+  hessll.profilemix <- function(par,yi,sei,mods) {
     isreg <- !missing(mods)
     muhat <- par[1]
     tau2 <- par[2]
@@ -22,10 +22,16 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
     negll <- -sum(log(apply(l,1,sum)))
    if (is.nan(negll)) negll <- NA
     if (!is.finite(negll)) negll <- NA
-return(negll)
+    return(negll)
   }
   
-  
+  ll.profilemix <- function(par,yi,sei,mods) {
+    negll <- hessll.profilemix(par,yi,sei,mods)
+    if (is.na(negll)) negll <- 1e100
+    return(negll)
+  }
+      
+    
   # obtain starting values
   if (isreg) {
     start.meta <- makestart.profilemix.metaplus(yi,sei, mods)$params
@@ -42,22 +48,16 @@ return(negll)
   names(lower.val) <- names(start.val)
   parnames(ll.profilemix) <- names(start.val)
   
-  if (isreg) profilemix.fit <- suppressWarnings(mle2(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="nlminb",
+  if (isreg) profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="user",optimfun=myoptim,
                                     skip.hessian=TRUE,
                                     data=list(yi=yi,sei=sei,mods=mods),
-                                    lower=lower.val))
-  else profilemix.fit <- suppressWarnings(mle2(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="nlminb",
+                                    lower=lower.val)
+  else profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="user",optimfun=myoptim,
                               skip.hessian=TRUE,
                               data=list(yi=yi,sei=sei),
-                              lower=lower.val))
+                              lower=lower.val)
   
   results <- profilemix.fit@coef
-  if (profilemix.fit@details$convergence!=0) {
-#    if (((profilemix.fit@details$message=="singular convergence (7)") & (profilet.fit@coef[3]<1e-6)) |
-    if  (!(profilemix.fit@details$message=="false convergence (8)")) {
-      warning(paste("convergence failed: ",profilemix.fit@details$message,sep=""))
-    }    
-  }
   # calculate final posterior probabilities
   muhat <- results[1]
   tau2 <- results[2]
@@ -82,8 +82,8 @@ return(negll)
 
   if (!justfit)  {
     results <- profilemix.fit@coef
-    if (isreg) thehessian <- hessian(ll.profilemix,results,yi=yi,sei=sei,mods=mods)
-    else thehessian <- hessian(ll.profilemix,results,yi=yi,sei=sei)
+    if (isreg) thehessian <- hessian(hessll.profilemix,results,yi=yi,sei=sei,mods=mods)
+    else thehessian <- hessian(hessll.profilemix,results,yi=yi,sei=sei)
     isproblem <- as.numeric(is.nan(diag(thehessian)) | (diag(thehessian)==0.0))
     isproblem2 <- isproblem*(1:length(results))
     noproblem2 <- (1-isproblem)*(1:length(results))
@@ -96,7 +96,7 @@ return(negll)
     if (isreg) whichp <- c(1,5:(4+dim(mods)[2]))
     else whichp <- 1
     profilemix.stderr <- ifelse(is.nan(myse),0.0,myse)
-    profilemix.profile <- suppressWarnings(profilemix.profile(profilemix.fit,which=whichp,std.err=profilemix.stderr))
+    profilemix.profile <- profilemix.profile(profilemix.fit,which=whichp,std.err=profilemix.stderr)
     profilemix.ci <- confint(profilemix.profile,method="uniroot")
     if (plotci) plot(profilemix.profile)
     
@@ -107,24 +107,24 @@ return(negll)
     pvalues <- rep(NA,length(start.val))
     for (iparm in whichp) {
       fixedparm <- names(start.val)[iparm]
-      if (isreg) dostart <- paste("newstart.meta <- suppressWarnings(makestart.profilemix.metaplus(yi,sei, mods,",
-                                  "fixed=list(",fixedparm,"=0.0)))$params","\n",sep="")
-      else dostart <- paste("newstart.meta <- suppressWarnings(makestart.profilemix.metaplus(yi,sei, NULL,",
-                            "fixed=list(",fixedparm,"=0.0)))$params","\n",sep="")
+      if (isreg) dostart <- paste("newstart.meta <- makestart.profilemix.metaplus(yi,sei, mods,",
+                                  "fixed=list(",fixedparm,"=0.0))$params","\n",sep="")
+      else dostart <- paste("newstart.meta <- makestart.profilemix.metaplus(yi,sei, NULL,",
+                            "fixed=list(",fixedparm,"=0.0))$params","\n",sep="")
       eval(parse(text=dostart))
       if (isreg) newstart.val <- c(newstart.meta$muhat,newstart.meta$tau2,newstart.meta$tau2out,newstart.meta$lpoutlier,newstart.meta$xcoef)
       else newstart.val <- c(newstart.meta$muhat,newstart.meta$tau2,newstart.meta$tau2out,newstart.meta$lpoutlier)
       names(newstart.val) <- names(start.val)
-      newstart.val <- newstart.val[-iparm]
-      newlower.val <- lower.val[-iparm]
-      if (isreg) doprofile <- paste("profilemix.fit0 <- suppressWarnings(mle2(ll.profilemix,start=newstart.val,vecpar=TRUE,\n",
-                                    "optimizer=\"nlminb\",data=list(yi=yi,sei=sei,mods=mods),\n",
+#      newstart.val <- newstart.val[-iparm]
+      newlower.val <- lower.val
+      if (isreg) doprofile <- paste("profilemix.fit0 <- mymle(ll.profilemix,start=newstart.val,vecpar=TRUE,\n",
+                                    "optimizer=\"user\",optimfun=myoptim,data=list(yi=yi,sei=sei,mods=mods),\n",
                                     "skip.hessian=TRUE,\n",
-                                    "lower=newlower.val,fixed=list(",fixedparm,"=0.0)))",sep="")
-      else doprofile <- paste("profilemix.fit0 <- suppressWarnings(mle2(ll.profilemix,start=newstart.val,vecpar=TRUE,\n",
-                              "optimizer=\"nlminb\",data=list(yi=yi,sei=sei),\n",
+                                    "lower=newlower.val,fixed=list(",fixedparm,"=0.0))",sep="")
+      else doprofile <- paste("profilemix.fit0 <- mymle(ll.profilemix,start=newstart.val,vecpar=TRUE,\n",
+                              "optimizer=\"user\",optimfun=myoptim,data=list(yi=yi,sei=sei),\n",
                               "skip.hessian=TRUE,\n",
-                              "lower=newlower.val,fixed=list(",fixedparm,"=0.0)))",sep="")
+                              "lower=newlower.val,fixed=list(",fixedparm,"=0.0))",sep="")
       eval(parse(text=doprofile))
       pvalues[iparm] <- anova(profilemix.fit,profilemix.fit0)[2,5]
     }

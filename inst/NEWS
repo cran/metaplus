@@ -1,3 +1,9 @@
+Changes in metaplus version 0.7-0
+
+  o improved convergence by using Nelder-Mead if nlminb failed
+
+  o used modified bbmle to fix bugs - changes will eventually be incorporated into bbmle 
+
 Changes in metaplus version 0.6-1
 
   o improve profiling of t-distribution models by using multiple starting values

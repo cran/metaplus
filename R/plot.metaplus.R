@@ -7,7 +7,7 @@ plot.metaplus <- function(x,...,extrameta=NULL) {
         stop("Use only with 'metaplus' xs.\n")
 
   if (x$justfit) stop("Cannot use with objects fitted with justfit=TRUE")
-
+  
   if (is.null(extrameta)) nsummaries <- 1
   else nsummaries <- length(extrameta)+1
   forest(x=x$yi,sei=x$sei,slab=x$slab,ylim=c(-0.5-nsummaries,length(x$yi)+3),...)

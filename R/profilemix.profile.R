@@ -16,7 +16,7 @@ setGeneric("profilemix.profile", function(fitted, which = 1:p, maxsteps = 100,
                                           try_harder=FALSE, ...) { standardGeneric("profilemix.profile")})
 
 
-setMethod("profilemix.profile", "mle2",
+setMethod("profilemix.profile", "mymle",
           function (fitted, which = 1:p, maxsteps = 100,
                     alpha = 0.01, zmax = sqrt(qchisq(1 - alpha/2, p)),
                     del = zmax/5, trace = FALSE, skiperrs=TRUE,
@@ -139,7 +139,7 @@ setMethod("profilemix.profile", "mle2",
             ndeps <- eval.parent(call$control$ndeps)
             parscale <- eval.parent(call$control$parscale)
             nc <- length(fitted@coef)
-            xf <- function(x) rep(x,length.out=nc) ## expand to length
+            xf <- function(x) if (is.null(x)) NULL else rep(x,length.out=nc) ## expand to length
             upper <- xf(unlist(eval.parent(call$upper)))
             lower <- xf(unlist(eval.parent(call$lower)))
             if (all(upper==Inf & lower==-Inf)) {
@@ -158,12 +158,6 @@ setMethod("profilemix.profile", "mle2",
               pvi <- pv0
               p.i <- Pnames[i]
               wfun <- function(txt) paste(txt," (",p.i,")",sep="")
-              ## omit values from control vectors:
-              ##   is this necessary/correct?
-              if (!is.null(ndeps)) call$control$ndeps <- ndeps[-i]
-              if (!is.null(parscale)) call$control$parscale <- parscale[-i]
-              if (!is.null(upper) && length(upper)>1) call$upper <- upper[-i]
-              if (!is.null(lower) && length(lower)>1) call$lower <- lower[-i]
               stop_msg[[i]] <- list(down="",up="")
               for (sgn in c(-1, 1)) {
                 dir_ind <- (sgn+1)/2+1 ## (-1,1) -> (1,2)
@@ -198,7 +192,7 @@ setMethod("profilemix.profile", "mle2",
                   curval <- B0[i] + sgn * step * del * std.err[i]
                   if ((sgn==-1 & curval<lbound) ||
                         (sgn==1 && curval>ubound)) {
-                    stop_bound <- TRUE;
+                    stop_bound <- TRUE
                     stop_msg[[i]][[dir_ind]] <- paste(stop_msg[[i]][[dir_ind]],wfun("hit bound"))
                     break
                   }
@@ -268,7 +262,7 @@ setMethod("profilemix.profile", "mle2",
               prof[[p.i]] <- data.frame(z = zi[si])
               prof[[p.i]]$par.vals <- pvi[si,, drop=FALSE]
             } ## for i in which
-            newprof <- new("profile.mle2", profile = prof, summary = summ)
+            newprof <- new("profile.mymle", profile = prof, summary = summ)
             attr(newprof,"stop_msg") <- stop_msg
             newprof
           })
