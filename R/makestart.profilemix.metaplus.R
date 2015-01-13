@@ -45,9 +45,12 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
     if (isreg) currtau2out <- sqrt(sum(outliers*(yi-currmuhat-as.vector(mods %*% currxcoef))^2)/sum(outliers))
     else currtau2out <- sqrt(sum(outliers*(yi-currmuhat)^2)/sum(outliers))
     if (is.nan(currtau2out)) currtau2out <- 3*currtau2
+    # if (currtau2out==0.0) browser()
+    if (currtau2out==0.0) currtau2out <- 0.2
     
+    #print(c(currtau2,currtau2out))
     # assemble into a vector to specify fixed
-     if (length(fixed)>0) {
+    if (length(fixed)>0) {
       current.vals <- c(currmuhat,currtau2,currtau2out,currlpoutlier,currxcoef)
       thenames <- c("muhat","tau2","tau2out","lpoutlier")
       if (isreg) thenames <- c(thenames,dimnames(mods)[[2]])
@@ -59,7 +62,7 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
       currlpoutlier <- current.vals[4]
       if (isreg) currxcoef <- matrix(current.vals[5:length(current.vals)],ncol=1)
     }
-     
+    
     currll <- -1.0e100
     nem <- 0
     repeat {
@@ -89,27 +92,29 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
       }
       # ????? convert to Nelder_mead
       if (isreg) results.nlm <- nlminb(startvals,optimrl2reg,
-                                      #               control=list(trace=6),
-                                      lower = c(-Inf,0,0,rep(-Inf,ncoef)),
-                                      lpoutlier=currlpoutlier,
-                                      prop=prop,
-                                      yi=yi,sei=sei,mods=mods,
-                                      isreg=isreg,fixed=fixed)
+                                       #               control=list(trace=6),
+                                       lower = c(-Inf,0,0,rep(-Inf,ncoef)),
+                                       lpoutlier=currlpoutlier,
+                                       prop=prop,
+                                       yi=yi,sei=sei,mods=mods,
+                                       isreg=isreg,fixed=fixed)
       else results.nlm <- nlminb(startvals,optimrl2reg,
-                                #               control=list(trace=6),
-                                lower = c(-Inf,0,0),
-                                lpoutlier=currlpoutlier,
-                                prop=prop,
-                                yi=yi,sei=sei,mods=NULL,
-                                isreg=isreg,fixed=fixed)
+                                 # control=list(trace=6),
+                                 lower = c(-Inf,0,0),
+                                 lpoutlier=currlpoutlier,
+                                 prop=prop,
+                                 yi=yi,sei=sei,mods=NULL,
+                                 isreg=isreg,fixed=fixed)
       currmuhat <- as.numeric(results.nlm$par)[1]
       currtau2 <- as.numeric(results.nlm$par)[2]
       currtau2out <- as.numeric(results.nlm$par)[3]
-      if (isreg) currxcoef <- matrix(as.numeric(results.nlm$par)[4:(3+ncoef)],ncol=1)
+       if (isreg) currxcoef <- matrix(as.numeric(results.nlm$par)[4:(3+ncoef)],ncol=1)
       else currxcoef <- NULL
       
       lastll <- currll
       currll <- -rl2reg(currmuhat,currtau2,currtau2out,currlpoutlier,currxcoef,yi,sei,mods,isreg)
+      #print(c(currll,currmuhat,currtau2,currtau2out,currlpoutlier))
+      #print(prop)
       if (abs((lastll-currll)/currll)<1.0e-6) break()
       if (nem >1000) break()
     }
@@ -141,6 +146,7 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
       warning(e)
       return(NULL)})
   maxll <- maxfitted$logLik 
+  #print(c(outliers,maxll))
   maxoutliers <- 0
   # allow for need to fit random efefcts model to nonoutliers
   if (isreg) ncoefs <- dim(mods)[2]
@@ -160,6 +166,9 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
           warning(e)
           return(NULL)})
       #if ((length(fitted$logLik)==0) | (length(currll)==0)) browser()
+      #print(c(outliers,fitted$logLik))
+      #print(fitted$params)
+      #print("******")
       if (fitted$logLik > currll) {
         currll <- fitted$logLik
         curroutlier <- ioutlier
@@ -172,5 +181,6 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
       maxoutliers <- c(maxoutliers,curroutlier)
     } else break;
   }
+  #print(maxfitted)
   return(maxfitted)
 }

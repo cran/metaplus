@@ -1,9 +1,9 @@
-63eb2ccb5032af838b8baee166d8a11a *DESCRIPTION
-524e813778457796ccf7cd4703dbe151 *NAMESPACE
+c969d4242e234a8e3ce190cf1f919b25 *DESCRIPTION
+5f2dea2905856c61b2f55480dad7ce5c *NAMESPACE
 e501198037e8c139e781ad9500aa1a66 *R/aaaaa.R
 4da7ce71aebe2807a183a099e11a8ae7 *R/confint.R
 85d2af57172470a3e62c3b33d0f7d1bb *R/globals.R
-d269b374ef30d48c22c672bf06c304f2 *R/makestart.profilemix.metaplus.R
+e480c5af9f1c548c7f8ebeb3e2d385f3 *R/makestart.profilemix.metaplus.R
 f4c9de22fb5633bcd87c2325975d0bf7 *R/makestart.profilenorm.metaplus.R
 55a67adc3f027b9ae5fae3a444f2bcc6 *R/metaplus.R
 f098f38005f5f7042e53c6e31e058d3a *R/misc.metaplus.R
@@ -14,10 +14,10 @@ e582da7b5fe1b1aca7cc228fd6a3bdb2 *R/mymle.R
 782195e8dfadcd2f9b67e1db8be6ec50 *R/plot.metaplus.R
 960a244242e591187e2b867218a99445 *R/plot.outlier.probs.R
 7ff367bb8315fc2f0490cbe00a41d5ef *R/profile.R
-da54b7c473f5b30f2fe3c82ec761e4c6 *R/profilemix.metaplus.R
-63ba637408119eaada9edaff0f50113e *R/profilemix.profile.R
+ffd6f34760b840ca27c47928c94b8e4e *R/profilemix.metaplus.R
+3c93c21940510882ad7733083d0311e2 *R/profilemix.profile.R
 e47cd6c69b915b82ca1f5581c246f966 *R/profilenorm.metaplus.R
-c36b306bc6ee23537f3a815fd9b8acd8 *R/profilet.metaplus.R
+a9d999fac5d91595875de397ea86565c *R/profilet.metaplus.R
 3387a9399e9a7f40f50a0402e525453c *R/profilet.profile.R
 af8677da9aaa24a4ff2f2d77b760d41d *R/summary.metaplus.R
 c871295e71dfbd1937c1c6a51ea48509 *R/test.outliers.metaplus.R
@@ -27,7 +27,7 @@ a4669d1e5e2bd1bda0bc946054afefee *R/test.outliers.profilet.metaplus.R
 5b182687a6c63c9b1a493e570cfc3665 *data/exercise.RData
 5462df11aa72c47115575e63d55f4d2c *data/mag.RData
 6635514c7a08edd0edea023dca78aa2e *data/marinho.RData
-c0d3f8af8f5f2363dd9481cc86fa32c4 *inst/NEWS
+de248a32e79c54caee53e4bd71a21e4c *inst/NEWS
 c953e22842d1c5cbaf68367d7bc144ae *inst/doc/beath-examples.R
 65903655cec1340dfce6e44172557319 *inst/doc/index.html
 b9f3cc15be14924e8a8ceba80fb63707 *man/AIC.Rd

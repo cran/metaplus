@@ -148,7 +148,7 @@ profilet.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=N
     noproblem2 <- (1-isproblem)*(1:length(results))
     if (all(isproblem2==0)) thehessian2 <- thehessian
     else thehessian2 <- thehessian[-isproblem2,-isproblem2]
-    themyse <- sqrt(diag(solve(thehessian2)))
+    themyse <- suppressWarnings(sqrt(diag(ginv(thehessian2))))
     # expand back to original length
     myse <- rep(0,length(results))
     myse[noproblem2] <- themyse

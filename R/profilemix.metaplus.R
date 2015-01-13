@@ -47,16 +47,15 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
   names(start.val) <- thenames
   names(lower.val) <- names(start.val)
   parnames(ll.profilemix) <- names(start.val)
-  
-  if (isreg) profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="user",optimfun=myoptim,
+    if (isreg) profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="user",optimfun=myoptim,
                                     skip.hessian=TRUE,
-                                    data=list(yi=yi,sei=sei,mods=mods),
+                                      data=list(yi=yi,sei=sei,mods=mods),
                                     lower=lower.val)
   else profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="user",optimfun=myoptim,
                               skip.hessian=TRUE,
                               data=list(yi=yi,sei=sei),
                               lower=lower.val)
-  
+   #print(profilemix.fit)
   results <- profilemix.fit@coef
   # calculate final posterior probabilities
   muhat <- results[1]
@@ -81,7 +80,6 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
   results <- profilemix.fit@coef
 
   if (!justfit)  {
-    results <- profilemix.fit@coef
     if (isreg) thehessian <- hessian(hessll.profilemix,results,yi=yi,sei=sei,mods=mods)
     else thehessian <- hessian(hessll.profilemix,results,yi=yi,sei=sei)
     isproblem <- as.numeric(is.nan(diag(thehessian)) | (diag(thehessian)==0.0))
@@ -89,7 +87,7 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
     noproblem2 <- (1-isproblem)*(1:length(results))
     if (all(isproblem2==0)) thehessian2 <- thehessian
     else thehessian2 <- thehessian[-isproblem2,-isproblem2]
-    themyse <- suppressWarnings(sqrt(diag(solve(thehessian2))))
+    themyse <- suppressWarnings(sqrt(diag(ginv(thehessian2))))
     # expand back to original length
     myse <- rep(0,length(results))
     myse[noproblem2] <- themyse
@@ -97,9 +95,31 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
     else whichp <- 1
     profilemix.stderr <- ifelse(is.nan(myse),0.0,myse)
     profilemix.profile <- profilemix.profile(profilemix.fit,which=whichp,std.err=profilemix.stderr)
+    if (!is.null(attr(profilemix.profile,"newfit"))) {
+      profilemix.fit <- attr(profilemix.profile,"newfit")
+       results <- profilemix.fit@coef
+      # calculate final posterior probabilities
+      muhat <- results[1]
+      tau2 <- results[2]
+      tau2out <- results[3]
+      lpoutlier <- results[4]
+      if (isreg) xcoef <- matrix(results[5:length(results)],ncol=1)
+      
+      poutlier <- exp(lpoutlier)/(1+exp(lpoutlier))
+      
+      w <- 1.0/(tau2+sei^2)
+      if (isreg) ll1 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
+      else ll1 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)
+      w <- 1.0/(tau2out+sei^2)
+      if (isreg) ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
+      else ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)
+      p <- c(1-poutlier,poutlier)
+      l <- exp(cbind(ll1,ll2))
+      
+      prop <- t(p*t(l))/apply(t(p*t(l)),1,sum)
+    }
     profilemix.ci <- confint(profilemix.profile,method="uniroot")
-    if (plotci) plot(profilemix.profile)
-    
+    if (plotci) plot(profilemix.profile)     
     theci <- matrix(rep(NA,length(profilemix.fit@coef)*2),ncol=2)
     theci[whichp,] <- profilemix.ci
     results <- cbind(results,theci)

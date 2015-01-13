@@ -13,6 +13,8 @@ import(boot,metafor,bbmle)
 importFrom(numDeriv,hessian)
 importFrom(lme4,Nelder_Mead)
 
+importFrom(MASS,ginv)
+
 S3method(plot, metaplus)
 S3method(summary, metaplus)
 S3method(logLik, metaplus)
