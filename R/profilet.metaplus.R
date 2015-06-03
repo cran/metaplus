@@ -141,8 +141,11 @@ profilet.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=N
     }
   results <- profilet.fit@coef
   if (!justfit) {
-    if (isreg) thehessian <- hessian(hessll.profilet,results,yi=yi,sei=sei,mods=mods)
-    else thehessian <- hessian(hessll.profilet,results,yi=yi,sei=sei)
+    hessresults <- results
+    # calculate hessian near tau2 of zero rather than zero so calculation works
+    if (hessresults[2] < 1.0e-6) hessresults[2] <- 1.0e-6
+    if (isreg) thehessian <- hessian(hessll.profilet,hessresults,yi=yi,sei=sei,mods=mods)
+    else thehessian <- hessian(hessll.profilet,hessresults,yi=yi,sei=sei)
     isproblem <- as.numeric(!(is.finite(diag(thehessian)) & (diag(thehessian)!=0.0)))
     isproblem2 <- isproblem*(1:length(results))
     noproblem2 <- (1-isproblem)*(1:length(results))

@@ -1,3 +1,9 @@
+Changes in metaplus version 0.7-2
+
+  o fixed bug with fitting t-distribution when tau^2 was zero
+
+  o update documentation
+
 Changes in metaplus version 0.7-1
 
   o fixed bug related to singularity of Hessian
