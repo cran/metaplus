@@ -1,3 +1,19 @@
+Changes in metaplus version 0.7-4
+
+  o added even more imports
+
+Changes in metaplus version 0.7-3
+
+  o fixed occasional problems when tau^2 is zero for all distributions
+
+  o if likelihood is mis-shapen and CI plot requestion then give a warning rather than fail
+
+  o check for inadequate number of studies and stop, or warn if only just adequate
+
+  o add cehck for appropriate model when calculating outlier probabilities
+
+  o add additional imports in NAMESPACE to pass R CMMD check
+
 Changes in metaplus version 0.7-2
 
   o fixed bug with fitting t-distribution when tau^2 was zero

@@ -4,7 +4,7 @@ profilet.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=N
   
   if (isreg) mods <- as.matrix(mods)
   
-  hessll.profilet <- function(par,yi,sei,mods) {
+  ll.profilet <- function(par,yi,sei,mods) {
     isreg <- !missing(mods)
 
      # browser()
@@ -55,15 +55,10 @@ profilet.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=N
     }
     if (is.nan(negll)) negll <- NA
     if (!is.finite(negll)) negll <- NA
-     return(negll)
-  }
-  
-  ll.profilet <- function(par,yi,sei,mods) {
-    negll <- hessll.profilet(par,yi,sei,mods)
     if (is.na(negll)) negll <- 1e100
     return(negll)
   }
-  
+    
   # obtain starting values
   if (isreg) {
     start.meta <- rma(yi=yi, sei=sei, mods=as.data.frame(mods), method="DL")
@@ -141,25 +136,35 @@ profilet.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=N
     }
   results <- profilet.fit@coef
   if (!justfit) {
-    hessresults <- results
-    # calculate hessian near tau2 of zero rather than zero so calculation works
-    if (hessresults[2] < 1.0e-6) hessresults[2] <- 1.0e-6
-    if (isreg) thehessian <- hessian(hessll.profilet,hessresults,yi=yi,sei=sei,mods=mods)
-    else thehessian <- hessian(hessll.profilet,hessresults,yi=yi,sei=sei)
-    isproblem <- as.numeric(!(is.finite(diag(thehessian)) & (diag(thehessian)!=0.0)))
+    if (isreg) thehessian <- hessian(ll.profilet,results,yi=yi,sei=sei,mods=mods)
+    else thehessian <- hessian(ll.profilet,results,yi=yi,sei=sei)
+    
+    isproblem <- (results<1.0e-6) & ((1:length(results) %in% c(2,3)))
     isproblem2 <- isproblem*(1:length(results))
     noproblem2 <- (1-isproblem)*(1:length(results))
     if (all(isproblem2==0)) thehessian2 <- thehessian
     else thehessian2 <- thehessian[-isproblem2,-isproblem2]
+
+    #browser()
+    
     themyse <- suppressWarnings(sqrt(diag(ginv(thehessian2))))
     # expand back to original length
     myse <- rep(0,length(results))
     myse[noproblem2] <- themyse
-    if (isreg) whichp <- c(1,4:(3+dim(mods)[2]))
+
+     if (isreg) whichp <- c(1,4:(3+dim(mods)[2]))
     else whichp <- 1
     profilet.profile <- profilet.profile(profilet.fit,which=whichp,std.err=myse)
      profilet.ci <- confint(profilet.profile,method="uniroot")
-    if (plotci) plot(profilet.profile)
+
+    if (plotci) {
+      tryCatch(plot(profilet.profile),
+               error= function(e) {
+                 #browser()
+                 #plot(profilet.profile@profile$muhat$z,profilet.profile@profile$muhat$par.vals[,1])
+                 print(paste("Error in CI plot: ",e))
+               })
+    }
     
     theci <- matrix(rep(NA,length(profilet.fit@coef)*2),ncol=2)
     theci[whichp,] <- profilet.ci

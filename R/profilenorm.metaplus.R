@@ -12,9 +12,10 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
     else negll <- 0.5*sum(log(2*pi)+log(1/w)+w*(yi-muhat)^2)
     if (is.nan(negll)) negll <- NA
     if (!is.finite(negll)) negll <- NA
+    if (is.na(negll)) negll <- 1e100
     return(negll)
   }
-  
+    
   # obtain starting values
   
   if (isreg) {
@@ -51,18 +52,27 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
   results <- profilenorm.fit@coef
   
   if (!justfit)  {
-    if (isreg) myse <- suppressWarnings(sqrt(diag(solve(hessian(ll.profilenorm,results,yi=yi,sei=sei,mods=as.matrix(mods))))))
-    else myse <- suppressWarnings(sqrt(diag(solve(hessian(ll.profilenorm,results,yi=yi,sei=sei)))))
-
-      myse <- ifelse(is.nan(myse),0.0,myse)
-      #browser()
+    if (isreg) thehessian <- hessian(ll.profilenorm,results,yi=yi,sei=sei,mods=as.matrix(mods))
+    else thehessian <- hessian(ll.profilenorm,results,yi=yi,sei=sei)
+    if (results[2] < 1.0e-6) {
+      myse <- suppressWarnings(sqrt(diag(ginv(thehessian[-2,-2]))))
+      if (length(myse)==1) myse <- c(myse,0.0)
+      else myse <- c(myse[1],0.0,myse[2:length(myse)])
+    } else myse <- suppressWarnings(sqrt(diag(ginv(thehessian))))
     
     if (isreg) whichp <- c(1,3:(2+dim(mods)[2]))
     else whichp <- 1
     #browser()
     profilenorm.profile <- profile(profilenorm.fit,which=whichp,std.err=myse)
     profilenorm.ci <- confint(profilenorm.profile,method="uniroot")
-    if (plotci) plot(profilenorm.profile)
+    if (plotci) {
+      tryCatch(plot(profilenorm.profile),
+               error= function(e) {
+                 #browser()
+                 #plot(profilenorm.profile@profile$muhat$z,profilenorm.profile@profile$muhat$par.vals[,1])
+                 print(paste("Error in CI plot: ",e))
+               })
+    }
     
     theci <- matrix(rep(NA,length(profilenorm.fit@coef)*2),ncol=2)
     theci[whichp,] <- profilenorm.ci

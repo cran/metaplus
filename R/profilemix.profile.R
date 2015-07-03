@@ -52,6 +52,7 @@ setMethod("profilemix.profile", "mymle",
               names(fix) <- p.i
               if (is.null(call$fixed)) call$fixed <- fix
               else call$fixed <- c(eval(call$fixed),fix)
+              #print(call$fixed)
               start <- makestart.profilemix.metaplus(call$data$yi,call$data$sei,mods=call$data$mods,fixed=call$fixed)$params
               start <- unlist(start)
               names(start) <- names(call$start)
@@ -98,6 +99,7 @@ setMethod("profilemix.profile", "mymle",
                 } else {
                   z <- sgn * sqrt(zz)
                 }
+                #print(c(z,logLik(pfit),coef(pfit)))
                 pvi <<- rbind(pvi, ri)
                 zi <<- c(zi, z) ## nb GLOBAL set
               }

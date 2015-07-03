@@ -31,7 +31,7 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
     
     if (isreg) start.meta <- makestart.profilenorm.metaplus(yi=yi[outliers==0],sei=sei[outliers==0],mods=as.data.frame(mods[outliers==0,,drop=FALSE]),fixed=fixed)
     else start.meta <- makestart.profilenorm.metaplus(yi=yi[outliers==0],sei=sei[outliers==0],fixed=fixed)
-    
+     
     currtau2 <- start.meta$tau2
     poutlier <- sum(outliers)/length(outliers)
     if (poutlier<(0.5/length(outliers))) poutlier <- 0.5/length(outliers)
@@ -135,7 +135,6 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
   infixed <- fixed
   fixed <- unlist(infixed)
   names(fixed) <- names(infixed)
-  
   maxoutliers <- c()
   # start with no outliers
   outliers <- rep(0,length(yi))

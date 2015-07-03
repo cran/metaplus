@@ -4,7 +4,7 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
   
   if (isreg) mods <- as.matrix(mods)
   
-  hessll.profilemix <- function(par,yi,sei,mods) {
+  ll.profilemix <- function(par,yi,sei,mods) {
     isreg <- !missing(mods)
     muhat <- par[1]
     tau2 <- par[2]
@@ -22,15 +22,9 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
     negll <- -sum(log(apply(l,1,sum)))
    if (is.nan(negll)) negll <- NA
     if (!is.finite(negll)) negll <- NA
-    return(negll)
-  }
-  
-  ll.profilemix <- function(par,yi,sei,mods) {
-    negll <- hessll.profilemix(par,yi,sei,mods)
-    if (is.na(negll)) negll <- 1e100
-    return(negll)
-  }
-      
+   if (is.na(negll)) negll <- 1e100
+   return(negll)
+  }      
     
   # obtain starting values
   if (isreg) {
@@ -80,9 +74,11 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
   results <- profilemix.fit@coef
 
   if (!justfit)  {
-    if (isreg) thehessian <- hessian(hessll.profilemix,results,yi=yi,sei=sei,mods=mods)
-    else thehessian <- hessian(hessll.profilemix,results,yi=yi,sei=sei)
-    isproblem <- as.numeric(is.nan(diag(thehessian)) | (diag(thehessian)==0.0))
+    if (isreg) thehessian <- hessian(ll.profilemix,results,yi=yi,sei=sei,mods=mods)
+    else thehessian <- hessian(ll.profilemix,results,yi=yi,sei=sei)
+# tau2 and tau2out can be zero 
+#browser()
+    isproblem <- (results<1.0e-6) & ((1:length(results) %in% c(2,3)))
     isproblem2 <- isproblem*(1:length(results))
     noproblem2 <- (1-isproblem)*(1:length(results))
     if (all(isproblem2==0)) thehessian2 <- thehessian
@@ -119,7 +115,14 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
       prop <- t(p*t(l))/apply(t(p*t(l)),1,sum)
     }
     profilemix.ci <- confint(profilemix.profile,method="uniroot")
-    if (plotci) plot(profilemix.profile)     
+    if (plotci) {
+      tryCatch(plot(profilemix.profile),
+              error= function(e) {
+                #browser()
+                #plot(profilemix.profile@profile$muhat$z,profilemix.profile@profile$muhat$par.vals[,1])
+                print(paste("Error in CI plot: ",e))
+              })
+    }
     theci <- matrix(rep(NA,length(profilemix.fit@coef)*2),ncol=2)
     theci[whichp,] <- profilemix.ci
     results <- cbind(results,theci)
