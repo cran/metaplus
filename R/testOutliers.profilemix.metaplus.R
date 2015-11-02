@@ -1,4 +1,4 @@
-test.outliers.profilemix.metaplus <- function(object,R=999) {
+testOutliers.profilemix.metaplus <- function(object,R=999) {
   
   meta.fun <- function(data) {    
     

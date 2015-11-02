@@ -75,7 +75,7 @@ profilet.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=N
   parnames(ll.profilet) <- thenames
   names(start.val) <- thenames
   names(lower.val) <- thenames
-  
+
   # vinv=0.0 is a special case for some reason, maybe problem in optimisation
   normfit <- profilenorm.metaplus(yi=yi,sei=sei,mods=mods,justfit=TRUE,plotci=FALSE,slab=NULL)$fittedmodel
   if (isreg) start.null <- c(coef(normfit)[1:2],0.0,coef(normfit)[3:length(coef(normfit))])
@@ -106,6 +106,8 @@ profilet.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=N
                                                skip.hessian=TRUE,
                                                control=list(eval.max=1000),
                                                lower=lower.val,optimfun=myoptim)
+    #print(vinv)
+    #print(profilet.fit)
     if (logLik(profilet.fit) > maxll) {
       maxfit <- profilet.fit
       maxll <- logLik(profilet.fit)
@@ -135,33 +137,71 @@ profilet.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=N
     profilet.fit@min <- profilet.fit2@min
     }
   results <- profilet.fit@coef
+  profilet.profiled <- NULL
   if (!justfit) {
+    notprofiled <- TRUE
+  while (notprofiled) {
     if (isreg) thehessian <- hessian(ll.profilet,results,yi=yi,sei=sei,mods=mods)
     else thehessian <- hessian(ll.profilet,results,yi=yi,sei=sei)
     
-    isproblem <- (results<1.0e-6) & ((1:length(results) %in% c(2,3)))
+    isproblem <- ((results<1.0e-6) & ((1:length(results) %in% c(2,3)))) | is.na(diag(thehessian))
     isproblem2 <- isproblem*(1:length(results))
     noproblem2 <- (1-isproblem)*(1:length(results))
     if (all(isproblem2==0)) thehessian2 <- thehessian
     else thehessian2 <- thehessian[-isproblem2,-isproblem2]
-
+    
     #browser()
     
     themyse <- suppressWarnings(sqrt(diag(ginv(thehessian2))))
     # expand back to original length
     myse <- rep(0,length(results))
     myse[noproblem2] <- themyse
-
-     if (isreg) whichp <- c(1,4:(3+dim(mods)[2]))
+    
+    if (isreg) whichp <- c(1,4:(3+dim(mods)[2]))
     else whichp <- 1
-    profilet.profile <- profilet.profile(profilet.fit,which=whichp,std.err=myse)
-     profilet.ci <- confint(profilet.profile,method="uniroot")
+    # if all else fails replace the Nan by 1.0e-6 as they will result from square root of negative diagonals on Hessian
+    myse[is.na(myse)] <- 1.0e-6
+    profilet.profiled <- profilet.profile(profilet.fit,which=whichp,std.err=myse)
+    if (class(profilet.profiled) == "profile.mymle") notprofiled <- FALSE
+    else {
+      #browser()
+      thenames <- c("muhat","tau2","vinv")
+      start.val <- profilet.profiled@fullcoef
+      if (isreg) {
+        lower.val <- c(-Inf,0.0,0.0,rep(-Inf,dim(mods)[2]))
+        thenames <- c(thenames,dimnames(mods)[[2]])
+      } else {
+        lower.val <- c(-Inf,0.0,0.0)
+      }
+      #browser()
+      parnames(ll.profilet) <- thenames
+      names(start.val) <- thenames
+      names(lower.val) <- thenames
+      if (isreg) profilet.fit <- mymle(ll.profilet,start=start.val,vecpar=TRUE,optimizer="user",
+                                       data=list(yi=yi,sei=sei,mods=mods),
+                                       skip.hessian=TRUE,
+                                       control=list(eval.max=1000),
+                                       lower=lower.val,optimfun=myoptim)
+      else profilet.fit <- mymle(ll.profilet,start=start.val,vecpar=TRUE,optimizer="user",
+                                 data=list(yi=yi,sei=sei),
+                                 skip.hessian=TRUE,
+                                 control=list(eval.max=1000),
+                                 lower=lower.val,optimfun=myoptim)
+      results <- profilet.fit@coef
+    }
+  }
+    #browser()
+    
+    if (any(order(profilet.profiled@profile$muhat$z)!=(1:length(profilet.profiled@profile$muhat$z)))) 
+      warning("Profile loglikelihood is not unimodal in region of estimate. Possibly incorrect confidence intervals.")
+     
+    profilet.ci <- confint(profilet.profiled,method="uniroot")
 
     if (plotci) {
-      tryCatch(plot(profilet.profile),
+      tryCatch(plot(profilet.profiled),
                error= function(e) {
                  #browser()
-                 #plot(profilet.profile@profile$muhat$z,profilet.profile@profile$muhat$par.vals[,1])
+                 #plot(profilet.profiled@profile$muhat$z,profilet.profiled@profile$muhat$par.vals[,1])
                  print(paste("Error in CI plot: ",e))
                })
     }
@@ -188,7 +228,7 @@ profilet.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab=N
       pvalues[iparm] <- anova(profilet.fit,profilet.fit0)[2,5]
     }
     results <- cbind(results,pvalues)
-    dimnames(results)[[2]] <- c("Est.","ci.lb","ci.ub","pvalue")
+    dimnames(results)[[2]] <- c("Est.","95% ci.lb","95% ci.ub","pvalue")
   }
-  return(list(results=results,yi=yi,sei=sei,mods=mods,slab=slab,fittedmodel=profilet.fit,justfit=justfit,random="t-dist"))
+  return(list(results=results,yi=yi,sei=sei,mods=mods,slab=slab,fittedmodel=profilet.fit,justfit=justfit,profile=profilet.profiled,random="t-dist"))
 }

@@ -105,6 +105,7 @@ setMethod("profilet.profile", "mymle",
                             "so original fit had not converged:\n")
                     message(sprintf("(new deviance=%1.4g, old deviance=%1.4g, diff=%1.4g)",
                                     2*pfit@min,2*fitted@min,2*(pfit@min-fitted@min)),"\n")
+                    #browser()
                     message("Returning better fit ...\n")
                     ## need to return parameters all the way up
                     ##   to top level
@@ -137,6 +138,7 @@ setMethod("profilet.profile", "mymle",
             if (any(is.na(std.err))) {
               std.err[is.na(std.err)] <- sqrt(1/diag(fitted@details$hessian))[is.na(std.err)]
               if (any(is.na(std.err))) {  ## still bad
+                #browser()
                 stop("Hessian is ill-behaved or missing, ",
                      "can't find an initial estimate of std. error ",
                      "(consider specifying std.err in profile call)")

@@ -1,4 +1,4 @@
-plot.outlier.probs <- function(x,...) {
+plot.outlierProbs <- function(x,...) {
   probs <- x$outlier.prob
   names(probs) <- x$slab
    dotchart(probs, xlim = c(0,1),xlab="Outlier Probability")

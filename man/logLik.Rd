@@ -12,7 +12,7 @@ Returns the log Likelihood for a metaplus object.
   \item{\dots}{ additional argument; currently none are used. }
 }
 \value{
-The loglikelihood of teh fiutted model.
+The loglikelihood of the fitted model.
 }
 \author{Ken Beath}
 \keyword{methods}

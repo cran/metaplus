@@ -1,8 +1,37 @@
+.onAttach <-
+  function (libname, pkgname) 
+  {
+    loadmsg <- "\nNote that there are changes to the names of some functions in version 0.7.5. See NEWS.\n"
+    packageStartupMessage(loadmsg, domain = NULL, appendLF = TRUE)
+  }
+
 metaplus <- function(yi,sei,mods=NULL,random="normal",
       label=switch(random,"normal"="Random Normal","t-dist"="Random t-distribution", "mixture"="Random mixture"),
-      plotci=FALSE,justfit=FALSE,slab=1:length(yi)) {
+      plotci=FALSE,justfit=FALSE,slab=1:length(yi),data) {
   if (!(random %in% c("normal","t-dist","mixture"))) stop("Unknown random effect type")
-  if (!is.null(mods)) mods <- as.data.frame(mods)
+  if (missing(data)) 
+    data <- NULL
+  if (is.null(data)) {
+    data <- sys.frame(sys.parent())
+  }
+  else {
+    if (!is.data.frame(data)) {
+      data <- data.frame(data)
+    }
+  }
+  mf <- match.call()
+  mf.yi <- mf[[match("yi", names(mf))]]
+  mf.sei <- mf[[match("sei", names(mf))]]
+  mf.slab <- mf[[match("slab", names(mf))]]
+  mf.mods <- mf[[match("mods", names(mf))]]
+  yi <- eval(mf.yi, data, enclos = sys.frame(sys.parent()))
+  sei <- eval(mf.sei, data, enclos = sys.frame(sys.parent()))
+  if (!is.null(mf.slab)) slab <- eval(mf.slab, data, enclos = sys.frame(sys.parent()))
+  mods <- eval(mf.mods, data, enclos = sys.frame(sys.parent()))
+  if (!is.null(mods)) {
+    mods <- as.data.frame(mods)
+    if (dim(mods)[2]==1) names(mods) <- deparse(mf.mods)
+  }
   df <- switch(random,
                 "normal"=length(yi)-1,
                 "t-dist"=length(yi)-2,

@@ -5,7 +5,7 @@
 \description{
 Data for the meta-analysis by Fioravanti and Yanagi (2005) of cytidinediphosphocholine (CDP-choline) for cognitive and behavioural disturbances associated with chronic cerebral disorders in the elderly.
 }
-\usage{data(cdp)}
+\usage{cdp}
 \format{
   A data frame with 10 observations on the following 3 variables.
   \describe{
@@ -23,7 +23,6 @@ Data for the meta-analysis by Fioravanti and Yanagi (2005) of cytidinediphosphoc
 
 \examples{
 \dontrun{
-data(cdp)
 cdp1 <- metaplus(cdp$yi,cdp$sei,plotci=TRUE,slab=cdp$study)
 }
 }

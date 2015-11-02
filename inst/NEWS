@@ -1,3 +1,21 @@
+Changes in metaplus version 0.7-5
+
+  o added data parameter to metaplus to indicate where data is, and changed all examples and documentation to use this
+
+  o added a print method for metaplus objects which prints summary
+
+  o documentation changes
+
+  o renamed outlier.probs to outlierProbs and test.outliers to testOutliers to align with standard R naming conventions
+
+  o added further improvements to handing of tau^2 close to zero
+
+  o if new maxima is found during profiling then update solution (in practice this usually means that the likelihood is almost flat and very messy)
+
+  o add check for multimodal profile likelhood and give warning
+
+  o return profile so that this can be further examined 
+
 Changes in metaplus version 0.7-4
 
   o added even more imports
@@ -6,7 +24,7 @@ Changes in metaplus version 0.7-3
 
   o fixed occasional problems when tau^2 is zero for all distributions
 
-  o if likelihood is mis-shapen and CI plot requestion then give a warning rather than fail
+  o if likelihood is mis-shapen and CI plot requested then give a warning rather than fail
 
   o check for inadequate number of studies and stop, or warn if only just adequate
 

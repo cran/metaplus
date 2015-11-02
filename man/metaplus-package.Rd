@@ -5,37 +5,34 @@
 Fits random effects meta-analysis models including robust models
 }
 \description{
-Allows fitting of random effects meta-analysis producing confidence intervals based on profile likelihood (Hardy and Thompson, 1996). Two methods of robust meta-analysis are included, based on either the \eqn{t}-distribution (Baker and Jackson (2008) and Lee and Thompson (2008)) or normal-mixture distribution (Beath, 2014). Tests can be performed for the need for a robust model, using a parametric bootstrap, and for the normal-mixture the identity of the outliers using the posterior probability. Plots are produced allowing a comparison between the results of each method. Where possible use has been made of the metafor package.
-
-Future enhancements include the addition of binary meta-analysis using a likelihoiod approach with confidence intervals from profile likelihood.
+Allows fitting of random effects meta-analysis producing confidence intervals based on the profile likelihood (Hardy and Thompson, 1996). Two methods of robust meta-analysis are included, based on either the \eqn{t}-distribution (Baker and Jackson (2008) and Lee and Thompson (2008)) or normal-mixture distribution (Beath, 2014). Tests can be performed for the need for a robust model, using a parametric bootstrap, and for the normal-mixture the identity of the outliers using the posterior probability. Plots are produced allowing a comparison between the results of each method. Where possible use has been made of the metafor package.
 }
 \section{The metaplus function}{
-This is the main function that allows fitting the models.metaplus objects may be plotted, using plot, tested for outliers using test.outliers. The results of tests.outliers may also be plotted.
+This is the main function that allows fitting the models. The metaplus objects may be plotted, using plot, and tested for outliers using testOutliers. The results of tests.outliers may also be plotted.
 }
 \author{
 Ken Beath <ken.beath@mq.edu.au>
 }
 \examples{
 \dontrun{
-data(marinho)
 # fit standard normal random effects model
-marinho1 <- metaplus(marinho$meaneffect,marinho$seeffect,plotci=TRUE,slab=marinho$study)
+marinho1 <- metaplus(meaneffect,seeffect,plotci=TRUE,slab=study,data=marinho)
 summary(marinho1)
 # fit t-distribution random effects model
-marinho2 <- metaplus(marinho$meaneffect,marinho$seeffect,plotci=TRUE,slab=marinho$study,
-  random="t-dist")
+marinho2 <- metaplus(meaneffect,seeffect,plotci=TRUE,slab=study,
+  random="t-dist",data=marinho)
 summary(marinho2)
 # test for presence of outliers
-summary(test.outliers(marinho2))
+summary(testOutliers(marinho2))
 # fit mixture normal random effects model
-marinho3 <- metaplus(marinho$meaneffect,marinho$seeffect,plotci=TRUE,slab=marinho$study,
-  random="mixture")
+marinho3 <- metaplus(meaneffect,seeffect,plotci=TRUE,slab=study,
+  random="mixture",data=marinho)
 summary(marinho3)
 # test for presence of outliers
-summary(test.outliers(marinho3))
+summary(testOutliers(marinho3))
 # obtain posterior probability of each study being an outlier and plot
-marinho3.outlier.probs <- outlier.probs(marinho3)
-plot(marinho3.outlier.probs)
+marinho3.outlierProbs <- outlierProbs(marinho3)
+plot(marinho3.outlierProbs)
 # produce forest plot including all 3 fitted models to compare
 plot(marinho1,extrameta=list(marinho2,marinho3))
 }

@@ -10,7 +10,7 @@ Allows fitting of random effects meta-analysis producing confidence intervals ba
 metaplus(yi,sei,mods=NULL,random="normal",
       label=switch(random,"normal"="Random Normal","t-dist"="Random t-distribution",
         "mixture"="Random mixture"),
-      plotci=FALSE,justfit=FALSE,slab=1:length(yi))
+      plotci=FALSE,justfit=FALSE,slab=1:length(yi),data)
 }
 \arguments{
   \item{yi}{
@@ -37,6 +37,9 @@ Should model only be fitted? If justfit=TRUE then profiling and likelihood ratio
   \item{slab}{
 Vector of character strings corresponding to each study.
 }
+  \item{data}{
+Optional data frame containing some or all other data.
+}
 }
 \details{
 As well as standard normal random effects meta-analysis, fitting of robust models incorporating either a \eqn{t}-distribution random effect (Lee and Thompson, 2008 or Baker and Jackson, 2008) or a mixture of normals (Beath, 2014) may be fitted. For all models the profile log-likelihood (Hardy and Thompson, 1996) is used to determine the confidence intervals for the parameters, with corresponding p values calculated using the likelihood ratio test, to give consistency between the confidence intervals and p values. The profile log-likelihood produces confidence intervals with better properties than REML or Der Simonian-Laird method (Brockwell and Gordon 2001, Jackson et al 2010)
@@ -51,6 +54,7 @@ For the mixture normal model, multiple starting values are used. This is achieve
 \item{slab}{Study labels}
 \item{justfit}{Value of justfit passed to the method.}
 \item{fittedmodel}{final model returned by mle2}
+\item{profile}{profile likelihood returned as described in bbmle}
 \item{random}{Type of random effect}
 \item{outlier.prob}{Outlier probabilities for robust mixture model only}
 }
@@ -71,8 +75,7 @@ Lee, K. J., & Thompson, S. G. (2008). Flexible parametric models for random effe
 Ken Beath <ken.beath@mq.edu.au>
 }
 \examples{
-data(cdp)
-cdp.meta <- metaplus(cdp$yi,cdp$sei)
+cdp.meta <- metaplus(yi,sei,data=cdp)
 summary(cdp.meta)
 }
 \keyword{method}

@@ -1,5 +1,4 @@
 \name{summary}
-\alias{summary}
 \alias{summary.metaplus}
 \title{
 Summary of a metaplus object.}
@@ -23,8 +22,7 @@ Additional parameters to summary.}
 Ken Beath <ken.beath@mq.edu.au>
 }
 \examples{
-data(cdp)
-cdp1 <- metaplus(cdp$yi,cdp$sei,plotci=TRUE,slab=cdp$study)
+cdp1 <- metaplus(yi,sei,plotci=TRUE,slab=study,data=cdp)
 summary(cdp1)
 }
 \keyword{method}

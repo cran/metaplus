@@ -5,7 +5,7 @@
 \description{
 Data for the meta-analysis by Marinho et al (2009) to determine the effectiveness of fluoride toothpastes on caries in children.
 }
-\usage{data(marinho)}
+\usage{marinho}
 \format{
   A data frame with 70 observations on the following 11 variables.
   \describe{
@@ -28,8 +28,7 @@ Marinho, V. C. C., Higgins, J. P. T., Logan, S., & Sheiham, A. (2009). Fluoride 
 }
 \examples{
 \dontrun{
-data(marinho)
-marinho1 <- metaplus(marinho$meaneffect,marinho$seeffect,plotci=TRUE,slab=marinho$study)
+marinho1 <- metaplus(meaneffect,seeffect,plotci=TRUE,slab=study,data=marinho)
 }
 }
 \keyword{datasets}

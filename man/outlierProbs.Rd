@@ -1,11 +1,11 @@
-\name{outlier.probs}
-\alias{outlier.probs}
+\name{outlierProbs}
+\alias{outlierProbs}
 \title{
 Calculate outlier probabilities for each study.}
 \description{
 For the normal mixture random effect calculates the probability that each study is an outlier based on the posterior probability of it being an outlier.}
 \usage{
-outlier.probs(object)
+outlierProbs(object)
 }
 \arguments{
   \item{object}{
@@ -24,10 +24,9 @@ Ken Beath <ken.beath@mq.edu.au>
 }
 \examples{
 \dontrun{
-data(cdp)
 cdp3 <- metaplus(cdp$yi,cdp$sei,plotci=TRUE,slab=cdp$study,random="mixture")
-cdp3.outlier.probs <- outlier.probs(cdp3)
-plot(cdp3.outlier.probs)
+cdp3.outlierProbs <- outlierProbs(cdp3)
+plot(cdp3.outlierProbs)
 }
 }
 \keyword{method}

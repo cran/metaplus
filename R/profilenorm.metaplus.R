@@ -23,6 +23,7 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
     start.val <- c(start.meta$b[1,1],start.meta$tau2,start.meta$b[2:dim(start.meta$b)[1],1])
     lower.val <- c(-Inf,0.0,rep(-Inf,dim(mods)[2]))
   } else {
+    #browser()
     start.meta <- rma(yi=yi, sei=sei, method="DL")
     start.val <- c(start.meta$b[1,1],start.meta$tau2)
     lower.val <- c(-Inf,0.0)
@@ -50,6 +51,8 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
   if (profilenorm.fit@details$convergence!=0) warning(paste("convergence failed: ",profilenorm.fit@details$message,sep="",))
   
   results <- profilenorm.fit@coef
+ 
+  profilenorm.profile <- NULL
   
   if (!justfit)  {
     if (isreg) thehessian <- hessian(ll.profilenorm,results,yi=yi,sei=sei,mods=as.matrix(mods))
@@ -104,7 +107,7 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
       pvalues[iparm] <- anova(profilenorm.fit,profilenorm.fit0)[2,5]
     }
     results <- cbind(results,pvalues)
-    dimnames(results)[[2]] <- c("Est.","ci.lb","ci.ub","pvalue")
+    dimnames(results)[[2]] <- c("Est.","95% ci.lb","95% ci.ub","pvalue")
   }
-  return(list(results=results,yi=yi,sei=sei,mods=mods,slab=slab,justfit=justfit,fittedmodel=profilenorm.fit,random="normal"))
+  return(list(results=results,yi=yi,sei=sei,mods=mods,slab=slab,justfit=justfit,fittedmodel=profilenorm.fit,profile=profilenorm.profile,random="normal"))
 }

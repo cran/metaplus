@@ -5,7 +5,7 @@
 \description{
 Data for a meta-analysis of intravenous magnesium in acute myocardial infarction. An interesting question is whether the ISIS4 study is an outlier.
 }
-\usage{data(mag)}
+\usage{mag}
 \format{
   A data frame with 16 observations on the following 3 variables.
   \describe{
@@ -22,8 +22,7 @@ Sterne, J. A. C., Bradburn, M. J., & Egger, M. (2001). Meta-analysis in Stata. I
 
 \examples{
 \dontrun{
-data(mag)
-mag1 <- metaplus(mag$yi,mag$sei,plotci=TRUE,slab=mag$study)
+mag1 <- metaplus(yi,sei,plotci=TRUE,slab=study,data=mag)
 }
 }
 \keyword{datasets}

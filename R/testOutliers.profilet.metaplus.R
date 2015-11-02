@@ -1,4 +1,4 @@
-test.outliers.profilet.metaplus <- function(object,R=999) {
+testOutliers.profilet.metaplus <- function(object,R=999) {
    
   meta.fun <- function(data) {    
 
@@ -37,8 +37,25 @@ test.outliers.profilet.metaplus <- function(object,R=999) {
   
   meta.ml <- rma(yi=object$yi, sei=object$sei, mods=object$mods, method="ML")
 
-  meta.boot <- boot(data=cbind(object$yi,object$sei,object$mods), meta.fun, R = R, sim = "parametric",
-                     ran.gen = meta.rg, mle=meta.ml)
+  meta.boot <- boot(data=cbind(object$yi,object$sei,object$mods), meta.fun,
+       R = R, sim = "parametric", ran.gen = meta.rg, mle=meta.ml)
+  
+#   RR <- rep(floor(R/ncpus),ncpus)
+#   RR[1] <- R-floor(R/ncpus)*(ncpus-1)
+#   
+#   run1 <- function(...) {
+#     #browser()
+#     #print(x)
+#     boot(data=cbind(object$yi,object$sei,object$mods), meta.fun,
+#               R = 99, sim = "parametric", ran.gen = meta.rg, mle=meta.ml)
+#   }
+#   
+#   browser()
+#   
+#   meta.boot <- do.call(c, mclapply(1, run1) )
+#   
+#   browser()
+  
   pvalue <- (sum(meta.boot$t[,1] >= meta.boot$t0[1],na.rm=TRUE)+1)/(1+sum(!is.nan(meta.boot$t[,1])))
   return(list(pvalue=pvalue,observed=meta.boot$t0[1],sims=meta.boot$t[,1]))
 }  

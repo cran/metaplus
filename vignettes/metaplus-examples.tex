@@ -24,8 +24,7 @@ A number of studies have been performed to determine the effectiveness of intrav
 We can perform the standard random effects meta-analysis, and parameter estimates as follows:
 \begin{Schunk}
 \begin{Sinput}
-> data(mag)
-> mag.meta <- metaplus(mag$yi,mag$sei,slab=mag$study)
+> mag.meta <- metaplus(yi,sei,slab=study,data=mag)
 > summary(mag.meta)
 \end{Sinput}
 \begin{Soutput}
@@ -44,7 +43,7 @@ Adding \texttt{plotci=TRUE} will add a plot giving details of the profile confid
   \centering
 \begin{Schunk}
 \begin{Sinput}
-> mag.meta <- metaplus(mag$yi,mag$sei,slab=mag$study,plotci=TRUE)
+> mag.meta <- metaplus(yi,sei,slab=study,plotci=TRUE,data=mag)
 \end{Sinput}
 \end{Schunk}
 \includegraphics{metaplus-examples-003}
@@ -82,25 +81,25 @@ The forest plot showing the studies and overall effect can be shown using \textt
 Repeating the meta-analysis but now allowing for a $t$-distribution for the random effects by adding the \texttt{random="t-dist"}. From the summary the estimate of \texttt{vinv} the inverse degrees of freedom is almost zero, indicating close to infinite degrees of freedom, or a normal distribution.
 \begin{Schunk}
 \begin{Sinput}
-> mag.tdist <- metaplus(mag$yi,mag$sei,slab=mag$study,
-+         random="t-dist")
+> mag.tdist <- metaplus(yi,sei,slab=study,
++         random="t-dist",data=mag)
 > summary(mag.tdist)
 \end{Sinput}
 \begin{Soutput}
-            Est.      ci.lb      ci.ub   pvalue
-muhat -7.463e-01 -1.258e+00 -3.430e-01 0.000501
-tau2   2.540e-01                               
-vinv   6.051e-11                               
+         Est.   ci.lb   ci.ub   pvalue
+muhat -0.7463 -1.2583 -0.3430 0.000501
+tau2   0.2540                         
+vinv   0.0000                         
 
      logLik      AIC      BIC
   -19.68459 45.36918 47.68695
 \end{Soutput}
 \end{Schunk}
 
-We can confirm this with the \texttt{test.outliers} command, which performs a parametric bootstrap to obtain the null distribution of the likelihood ratio statistic for the test that $v^{-1}=0$, required as the test is on the boundary of the parameter space. Note that this may take some time, of the order of an hour, so it may be better to start with the parameter \texttt{R=99} to limit the number of simulations, with consequently lower accuracy.
+We can confirm this with the \texttt{testOutliers} command, which performs a parametric bootstrap to obtain the null distribution of the likelihood ratio statistic for the test that $v^{-1}=0$, required as the test is on the boundary of the parameter space. Note that this may take some time, of the order of an hour, so it may be better to start with the parameter \texttt{R=99} to limit the number of simulations, with consequently lower accuracy.
 \begin{Schunk}
 \begin{Sinput}
-> summary(test.outliers(mag.tdist))
+> summary(testOutliers(mag.tdist))
 \end{Sinput}
 \begin{Soutput}
 Observed LRT statistic 0.0 p value 1
@@ -111,8 +110,8 @@ We can repeat using the robust mixture distribution for the random effects. The 
 
 \begin{Schunk}
 \begin{Sinput}
-> mag.mix <- metaplus(mag$yi,mag$sei,slab=mag$study,
-+       random="mixture")
+> mag.mix <- metaplus(yi,sei,slab=study,
++       random="mixture",data=mag)
 > summary(mag.mix)
 \end{Sinput}
 \begin{Soutput}
@@ -126,7 +125,7 @@ Outlier prob.  0.0001904
   -19.68459 47.36918 50.45954
 \end{Soutput}
 \begin{Sinput}
-> summary(test.outliers(mag.mix))
+> summary(testOutliers(mag.mix))
 \end{Sinput}
 \begin{Soutput}
 Observed LRT statistic 0.0 p value 1
@@ -140,8 +139,7 @@ behavioral disturbances associated with chronic cerebral disorders in the elderl
 
 \begin{Schunk}
 \begin{Sinput}
-> data(cdp)
-> cdp.meta <- metaplus(cdp$yi,cdp$sei,plotci=TRUE,slab=cdp$study)
+> cdp.meta <- metaplus(yi,sei,plotci=TRUE,slab=study,data=cdp)
 > summary(cdp.meta)
 \end{Sinput}
 \begin{Soutput}
@@ -157,8 +155,8 @@ Note that Senin 2003 does have an unusually high value. We can then fit a robust
 
 \begin{Schunk}
 \begin{Sinput}
-> cdp.tdist <- metaplus(cdp$yi,cdp$sei,plotci=TRUE,slab=cdp$study,
-+         random="t-dist")
+> cdp.tdist <- metaplus(yi,sei,plotci=TRUE,slab=study,
++         random="t-dist",data=cdp)
 > summary(cdp.tdist)
 \end{Sinput}
 \begin{Soutput}
@@ -171,7 +169,7 @@ vinv  2.024e+00
   -4.057686 14.11537 15.02313
 \end{Soutput}
 \begin{Sinput}
-> summary(test.outliers(cdp.tdist))
+> summary(testOutliers(cdp.tdist))
 \end{Sinput}
 \begin{Soutput}
 Observed LRT statistic 8.3 p value 0.002
@@ -181,22 +179,22 @@ As a rough guide, the improvement in AIC and BIC demonstrate that the model is a
 
 \begin{Schunk}
 \begin{Sinput}
-> cdp.mix <- metaplus(cdp$yi,cdp$sei,plotci=TRUE,slab=cdp$study,
-+         random="mixture")
+> cdp.mix <- metaplus(yi,sei,plotci=TRUE,slab=study,
++         random="mixture",data=cdp)
 > summary(cdp.mix)
 \end{Sinput}
 \begin{Soutput}
-                 Est.   ci.lb   ci.ub  pvalue
-muhat         0.19099 0.05586 0.34810 0.00711
-tau2          0.00000                        
-tau2out       3.15584                        
-Outlier prob. 0.12366                        
+                Est.  ci.lb  ci.ub  pvalue
+muhat         0.1910 0.0563 0.3479 0.00711
+tau2          0.0000                      
+tau2out       3.1558                      
+Outlier prob. 0.1237                      
 
      logLik      AIC      BIC
   -3.007145 14.01429 15.22463
 \end{Soutput}
 \begin{Sinput}
-> summary(test.outliers(cdp.mix))
+> summary(testOutliers(cdp.mix))
 \end{Sinput}
 \begin{Soutput}
 Observed LRT statistic 10.4 p value 0.001
@@ -205,7 +203,7 @@ Observed LRT statistic 10.4 p value 0.001
 The output from the robust mixture model has an interesting feature. For standard studies the estimated random effects variance is zero, indicating that only the outlier studies are contributing to the heterogeneity. The posterior probability of each study being an outlier can be obtained as:
 \begin{Schunk}
 \begin{Sinput}
-> cdp.mix.outlier.probs <- outlier.probs(cdp.mix)
+> cdp.mix.outlierProbs <- outlierProbs(cdp.mix)
 \end{Sinput}
 \end{Schunk}
 and plotted as in Figure~\ref{fig:outliers2}. This shows clearly that Senin 2003 does have a posterior probability of nearly 1.0 of being an outlier. The other studies have some posterior probability of being outliers, as there is an overlap between the distribution of the standard and outlier studies.
@@ -214,7 +212,7 @@ and plotted as in Figure~\ref{fig:outliers2}. This shows clearly that Senin 2003
   \centering
 \begin{Schunk}
 \begin{Sinput}
-> plot(cdp.mix.outlier.probs)
+> plot(cdp.mix.outlierProbs)
 \end{Sinput}
 \end{Schunk}
 \includegraphics{metaplus-examples-013}
@@ -242,9 +240,8 @@ This example is a meta-analysis of trials of exercise in the management of depre
 
 \begin{Schunk}
 \begin{Sinput}
-> data(exercise)
-> exercise.meta <- metaplus(exercise$smd,sqrt(exercise$varsmd),
-+       mods=exercise[,c("duration"),drop=FALSE],slab=exercise$study)
+> exercise.meta <- metaplus(smd,sqrt(varsmd),
++       mods=duration,slab=study,data=exercise)
 > summary(exercise.meta)
 \end{Sinput}
 \begin{Soutput}
@@ -257,31 +254,30 @@ duration  0.2078  0.0584  0.3632 0.011570
   -8.133435 22.26687 23.17462
 \end{Soutput}
 \begin{Sinput}
-> exercise.mix <- metaplus(exercise$smd,sqrt(exercise$varsmd),
-+       mods=exercise[,c("duration"),drop=FALSE],
-+       slab=exercise$study,random="mixture")
+> exercise.mix <- metaplus(smd,sqrt(varsmd),
++       mods=duration,slab=study,random="mixture",data=exercise)
 > summary(exercise.mix)
 \end{Sinput}
 \begin{Soutput}
                   Est.    ci.lb    ci.ub   pvalue
-muhat         -2.88472 -4.11371 -1.48419 0.000649
+muhat         -2.88472 -4.11082 -1.48262 0.000649
 tau2           0.00000                           
 tau2out        0.59398                           
 Outlier prob.  0.25169                           
-duration       0.21086  0.07429  0.34608 0.007052
+duration       0.21086  0.07808  0.34586 0.007052
 
     logLik      AIC     BIC
   -7.69139 25.38278 26.8957
 \end{Soutput}
 \begin{Sinput}
-> exercise.test.outliers <- test.outliers(exercise.mix)
-> summary(exercise.test.outliers)
+> exercise.testOutliers <- testOutliers(exercise.mix)
+> summary(exercise.testOutliers)
 \end{Sinput}
 \begin{Soutput}
 Observed LRT statistic 0.9 p value 0.077
 \end{Soutput}
 \begin{Sinput}
-> exercise.outlier.probs <- outlier.probs(exercise.mix)
+> exercise.outlierProbs <- outlierProbs(exercise.mix)
 \end{Sinput}
 \end{Schunk}
 
@@ -292,7 +288,7 @@ The test for outliers was close to significant (p=0.077), however a conservative
   \centering
 \begin{Schunk}
 \begin{Sinput}
-> plot(exercise.outlier.probs)
+> plot(exercise.outlierProbs)
 \end{Sinput}
 \end{Schunk}
 \includegraphics{metaplus-examples-016}
@@ -307,21 +303,21 @@ To calculate the effect at each of Weeks 4, 8 and 12 it is easiest to center the
 > exercise$duration4 <- exercise$duration-4
 > exercise$duration8 <- exercise$duration-8
 > exercise$duration12 <- exercise$duration-12
-> exercise.nodurn <- metaplus(exercise$smd,sqrt(exercise$varsmd),
-+     label="Random Mixture (No Duration)",slab=exercise$study,
-+     random="mixture")
-> exercise.wk4 <- metaplus(exercise$smd,sqrt(exercise$varsmd),
-+     mods=exercise[,c("duration4"),drop=FALSE],plotci=TRUE,
-+     label="Random Mixture (Week 4)",slab=exercise$study,
-+     random="mixture")
-> exercise.wk8 <- metaplus(exercise$smd,sqrt(exercise$varsmd),
-+     mods=exercise[,c("duration8"),drop=FALSE],
-+     label="Random Mixture (Week 8)",slab=exercise$study,
-+     random="mixture")
-> exercise.wk12 <- metaplus(exercise$smd,sqrt(exercise$varsmd),
-+     mods=exercise[,c("duration12"),drop=FALSE],
-+     label="Random Mixture (Week 12)",slab=exercise$study,
-+     random="mixture")
+> exercise.nodurn <- metaplus(smd,sqrt(varsmd),
++     label="Random Mixture (No Duration)",slab=study,
++     random="mixture",data=exercise)
+> exercise.wk4 <- metaplus(smd,sqrt(varsmd),
++     mods=duration4,
++     label="Random Mixture (Week 4)",slab=study,
++     random="mixture",data=exercise)
+> exercise.wk8 <- metaplus(smd,sqrt(varsmd),
++     mods=duration8,
++     label="Random Mixture (Week 8)",slab=study,
++     random="mixture",data=exercise)
+> exercise.wk12 <- metaplus(smd,sqrt(varsmd),
++     mods=duration12,
++     label="Random Mixture (Week 12)",slab=study,
++     random="mixture",data=exercise)
 \end{Sinput}
 \end{Schunk}
 

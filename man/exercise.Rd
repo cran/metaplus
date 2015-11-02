@@ -8,7 +8,7 @@ the management of depression, which was subsequently analysed using meta-
 regression (Higgins & Thompson 2004) with duration of treatment as a covariate. There is a possible
 outlier, the study by Reuter. While there are additional predictors, it seems excessive to use them given the small number of studies.
 }
-\usage{data(exercise)}
+\usage{exercise}
 \format{
   A data frame with 10 observations on the following 9 variables.
   \describe{
@@ -34,9 +34,8 @@ Lawlor, D. A., & Hopker, S. W. (2001). The effectiveness of exercise as an inter
 
 \examples{
 \dontrun{
-data(exercise)
-exercise1 <- metaplus(exercise$smd,sqrt(exercise$varsmd),mods=exercise[,c("duration"),drop=FALSE],
-  slab=exercise$study)
+exercise1 <- metaplus(smd,sqrt(varsmd),mods=duration,slab=study,data=exercise)
+exercise1 <- metaplus(smd,sqrt(varsmd),mods=cbind(duration,itt),slab=study,data=exercise)
 }
 }
 \keyword{datasets}
