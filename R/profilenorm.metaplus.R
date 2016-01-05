@@ -52,27 +52,61 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
   
   results <- profilenorm.fit@coef
  
-  profilenorm.profile <- NULL
+  profilenorm.profiled <- NULL
   
   if (!justfit)  {
-    if (isreg) thehessian <- hessian(ll.profilenorm,results,yi=yi,sei=sei,mods=as.matrix(mods))
-    else thehessian <- hessian(ll.profilenorm,results,yi=yi,sei=sei)
-    if (results[2] < 1.0e-6) {
-      myse <- suppressWarnings(sqrt(diag(ginv(thehessian[-2,-2]))))
-      if (length(myse)==1) myse <- c(myse,0.0)
-      else myse <- c(myse[1],0.0,myse[2:length(myse)])
-    } else myse <- suppressWarnings(sqrt(diag(ginv(thehessian))))
+    notprofiled <- TRUE
+    while (notprofiled) {
+       if (isreg) thehessian <- hessian(ll.profilenorm,results,yi=yi,sei=sei,mods=as.matrix(mods))
+      else thehessian <- hessian(ll.profilenorm,results,yi=yi,sei=sei)
+      if (results[2] < 1.0e-6) {
+        myse <- suppressWarnings(sqrt(diag(ginv(thehessian[-2,-2]))))
+        if (length(myse)==1) myse <- c(myse,0.0)
+        else myse <- c(myse[1],0.0,myse[2:length(myse)])
+      } else myse <- suppressWarnings(sqrt(diag(ginv(thehessian))))
+      
+      if (isreg) whichp <- c(1,3:(2+dim(mods)[2]))
+      else whichp <- 1
+      #browser()
+      #profilenorm.profiled <- profile(profilenorm.fit,which=whichp,std.err=myse,del=0.5)
+      profilenorm.profiled <- profile(profilenorm.fit,which=whichp,std.err=myse)
+      if (class(profilenorm.profiled) == "profile.mymle") notprofiled <- FALSE
+      else {
+        #browser()
+        thenames <- c("muhat","tau2")
+        start.val <- profilenorm.profiled@fullcoef
+        if (isreg) {
+          lower.val <- c(-Inf,0.0,rep(-Inf,dim(mods)[2]))
+          thenames <- c(thenames,dimnames(mods)[[2]])
+        } else {
+          lower.val <- c(-Inf,0.0)
+        }
+        #browser()
+        parnames(ll.profilenorm) <- thenames
+        names(start.val) <- thenames
+        names(lower.val) <- thenames
+        if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,optimizer="user",
+                                           data=list(yi=yi,sei=sei,mods=mods),
+                                           skip.hessian=TRUE,
+                                           control=list(eval.max=1000),
+                                           lower=lower.val,optimfun=myoptim)
+        else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,optimizer="user",
+                                     data=list(yi=yi,sei=sei),
+                                     skip.hessian=TRUE,
+                                     control=list(eval.max=1000),
+                                     lower=lower.val,optimfun=myoptim)
+        results <- profilenorm.fit@coef
+      }
+    }
     
-    if (isreg) whichp <- c(1,3:(2+dim(mods)[2]))
-    else whichp <- 1
-    #browser()
-    profilenorm.profile <- profile(profilenorm.fit,which=whichp,std.err=myse)
-    profilenorm.ci <- confint(profilenorm.profile,method="uniroot")
+    if (any(order(profilenorm.profiled@profile$muhat$z)!=(1:length(profilenorm.profiled@profile$muhat$z)))) 
+      warning("Profile loglikelihood is not unimodal in region of estimate. Possibly incorrect confidence intervals.")
+    profilenorm.ci <- confint(profilenorm.profiled,method="uniroot")
     if (plotci) {
-      tryCatch(plot(profilenorm.profile),
+      tryCatch(plot(profilenorm.profiled),
                error= function(e) {
                  #browser()
-                 #plot(profilenorm.profile@profile$muhat$z,profilenorm.profile@profile$muhat$par.vals[,1])
+                 #plot(profilenorm.profiled@profile$muhat$z,profilenorm.profiled@profile$muhat$par.vals[,1])
                  print(paste("Error in CI plot: ",e))
                })
     }
@@ -109,5 +143,5 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
     results <- cbind(results,pvalues)
     dimnames(results)[[2]] <- c("Est.","95% ci.lb","95% ci.ub","pvalue")
   }
-  return(list(results=results,yi=yi,sei=sei,mods=mods,slab=slab,justfit=justfit,fittedmodel=profilenorm.fit,profile=profilenorm.profile,random="normal"))
+  return(list(results=results,yi=yi,sei=sei,mods=mods,slab=slab,justfit=justfit,fittedmodel=profilenorm.fit,profile=profilenorm.profiled,random="normal"))
 }

@@ -7,7 +7,8 @@
 
 metaplus <- function(yi,sei,mods=NULL,random="normal",
       label=switch(random,"normal"="Random Normal","t-dist"="Random t-distribution", "mixture"="Random mixture"),
-      plotci=FALSE,justfit=FALSE,slab=1:length(yi),data) {
+      plotci=FALSE,justfit=FALSE,slab=1:length(yi),
+      useAGQ=FALSE,quadpoints=21,data) {
   if (!(random %in% c("normal","t-dist","mixture"))) stop("Unknown random effect type")
   if (missing(data)) 
     data <- NULL
@@ -41,7 +42,7 @@ metaplus <- function(yi,sei,mods=NULL,random="normal",
   if ((df<=3) & (!justfit)) warning("Very few studies. Solution may be unstable.")
   fit <- switch(random,
                 "normal"=profilenorm.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab),
-                "t-dist"=profilet.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab),
+                "t-dist"=profilet.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab,useAGQ,quadpoints),
                 "mixture"=profilemix.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab))
   fit$label <- label
   class(fit) <- "metaplus"

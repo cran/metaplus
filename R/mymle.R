@@ -21,145 +21,6 @@ setMethod("summary", "mymle", function(object, waldtest=TRUE, ...){
 })
 
 
-## FIXME: problem with bounds and formulae!
-calc_mle2_function <- function(formula,
-                               parameters,
-                               links,
-                               start,
-                               parnames,
-                               use.deriv=FALSE,
-                               data=NULL,
-                               trace=FALSE) {
-  ## resid=FALSE
-  ##  stub: what was I going to use this for ???
-  ##  returning residuals rather than mle (e.g. for minpack.nls??)
-  RHS <- formula[[3]]
-  ddistn <- as.character(RHS[[1]])
-  if (ddistn=="dnorm" && !("sd" %in% names(RHS))) {
-      warning("using dnorm() with sd implicitly set to 1 is rarely sensible")
-  }
-  if (ddistn=="dnbinom" && !("mu" %in% names(RHS))) {
-  }
-  ## need to check on variable order:
-  ## should it go according to function/formula,
-  ##   not start?
-  if (!is.list(data)) stop("must specify data argument",
-                           " (as a list or data frame)",
-                           " when using formula argument")
-  vecstart <- (is.numeric(start))
-  if (vecstart) start <- as.list(start) ## expand to a list
-  if (missing(parnames) || is.null(parnames)) {
-    parnames <- as.list(names(start))
-    names(parnames) <- names(start)
-  }
-  ## hack
-  if (!missing(parameters)) {
-    ## linear model specified for some parameters
-    vars <- as.character(sapply(parameters,"[[",2))
-    if (length(parameters)>1) {
-      models <-  sapply(parameters,function(z) call.to.char(z[[3]]))
-    } else {
-      models <- as.character(parameters)
-    }
-    models <- gsub(" ","",models)
-    parameters <- parameters[models!="1"]
-    npars <- length(parameters)
-    if (npars==0) { ## no non-constant parameters
-      parameters <- mmats <- vpos <- NULL
-    } else {
-      ## BUG IN HERE SOMEWHERE, FIXME: SENSITIVE TO ORDER OF 'start'
-      mmats <- list()
-      vpos <- list()
-      pnames0 <- parnames
-      names(parnames) <- parnames
-      for (i in seq(along=parameters)) {
-        vname <- vars[i]      ## name of variable
-        p <- parameters[[i]]  ## formula for variable
-        p[[2]] <- NULL
-        mmat <- model.matrix(p,data=data)     
-        pnames <- paste(vname,colnames(mmat),sep=".")
-        parnames[[vname]] <- pnames ## insert into parameter names
-        vpos0 <- which(pnames0==vname)
-        vposvals <- cumsum(sapply(parnames,length))
-        ## fill out start vectors with zeros or replicates as appropriate
-        if (length(start[[vname]])==1) {
-            if (length(grep("-1",models[i])>0)) {
-                start[[vname]] <- rep(start[[vname]],length(pnames))
-            } else {
-                start[[vname]] <- c(start[[vname]],rep(0,length(pnames)-1))
-            }
-        }
-        ## fix: what if parameters are already correctly specified?
-        startpos <- if (vpos0==1) 1 else vposvals[vpos0-1]+1
-        vpos[[vname]] <- startpos:vposvals[vpos0]
-        mmats[[vname]] <- mmat
-      }
-    }
-  } else parameters <- vars <- mmats <- vpos <- NULL
-  if (!missing(links)) {
-    stop("parameter link functions not yet implemented")
-    for (i in length(links)) {
-    }
-  }
-  parnames <- unlist(parnames)
-  start <- as.list(unlist(start)) ## collapse/re-expand (WHY?)
-  names(start) <- parnames
-  arglist <- as.list(RHS[-1]) ## delete function name
-  arglist$parameters <- NULL
-  arglist1 <- c(list(x=formula[[2]]),arglist,list(log=TRUE))
-  arglist1  ## codetools check kluge
-  fn <- function() {
-      ## is there a better way to do this?
-      ## need to look for parameters etc.
-      pars <- unlist(as.list(match.call())[-1])
-      if (!is.null(parameters)) {
-          for (.i in seq(along=parameters)) {
-              assign(vars[.i],mmats[[.i]] %*% pars[vpos[[.i]]])
-          }
-      }
-    ## if (is.null(data) || !is.list(data))
-    ## stop("data argument must be specified when using formula interface")
-    ## BUG/FIXME: data evaluates to 'FALSE' at this point -- regardless of whether
-    ## it has been specified
-    ## FIXME: how to make this eval() less fragile???
-    ## sys.frame(sys.nframe()) specifies the number of the *current* frame
-    ## ... envir=data,enclos=parent.frame()
-      ## this actually works OK: fails enigmatically if we
-      ## 
-    arglist2 <- lapply(arglist1,eval,envir=data,
-                       enclos=sys.frame(sys.nframe()))
-    if (use.deriv) {
-      stop("use.deriv is not yet implemented")
-      ## browser()
-      ## minor hack -- should store information otherwise -- could have
-      ##  different numbers of arguments for different distributions?
-      LLform <- get(gsub("^d","s",as.character(RHS[[1]])))(NA,NA)$formula
-      avals <- as.list(formula[[3]][-1])
-      for (i in seq_along(avals))
-        LLform <- gsub(names(avals)[i],avals[[i]],LLform)
-      r <- eval(deriv(parse(text=LLform),parnames),envir=c(arglist2,data))
-    } else {
-      r <- -sum(do.call(ddistn,arglist2))
-    }
-    ## doesn't work yet -- need to eval arglist in the right env ...
-    ## if (debugfn) cat(unlist(arglist),r,"\n")
-    if (trace) cat(pars,r,"\n")
-    r
-  }
-  npars <- length(parnames)
-  flist <-  vector("list",npars)
-  names(flist) <- parnames
-  ## add additional parnames?
-  ## browser()
-  ## flist <- c(flist,setdiff(names(arglist),c("x","log",... ?))
-  formals(fn) <- flist
-  if (vecstart) start <- unlist(start)
-  list(fn=fn,start=start,parameters=parameters,
-       fdata=list(vars=vars,mmats=mmats,vpos=vpos,
-       arglist1=arglist1,ddistn=ddistn,parameters=parameters),
-       parnames=parnames)
-}
-
 ## need logic that will identify correctly when
 ## we need to pass parameters as a vector
 mymle <- function(minuslogl,
@@ -185,8 +46,8 @@ mymle <- function(minuslogl,
                  ...) {
   if (!missing(transform))
     stop("parameter transformations not yet implemented")
-  if (missing(method)) method <- mle2.options("optim.method")
-  if (missing(optimizer)) optimizer <- mle2.options("optimizer")
+  if (missing(method)) method <- mymle.options("optim.method")
+  if (missing(optimizer)) optimizer <- mymle.options("optimizer")
   L <- list(...)
   if (optimizer=="optimize" && (is.null(L$lower) || is.null(L$upper)))
       stop("lower and upper bounds must be specified when using
@@ -592,26 +453,11 @@ mymle <- function(minuslogl,
 }
 
 
-get.mnames <- function(Call) {
-    xargs <- which(names(Call) %in% names(formals(ICtab))[-1])
-    mnames <- as.character(Call)[c(-1,-xargs)]
-    if (length(mnames)==1) {
-        g <- get(mnames)
-        if (is.list(g) && length(g)>1) {
-            if (is.null(names(g))) mnames <- paste("model",1:length(g),sep="")
-            else mnames <- names(g)
-            if (any(duplicated(mnames))) stop("model names must be distinct")
-        }
-    }
-    mnames
-}
-  
-
-mle2.options <- function(...) {
+mymle.options <- function(...) {
 single <- FALSE
 args <- list(...)
   setvals <- !is.null(names(args))
-  if (!length(args)) args <- names(.Mle2.options)
+  if (!length(args)) args <- names(.mymle.options)
 if (all(unlist(lapply(args, is.character)))) 
      args <- as.list(unlist(args))
   if (length(args) == 1) {
@@ -621,12 +467,150 @@ if (all(unlist(lapply(args, is.character))))
       single <- TRUE
   }
   if (setvals) {
-    .Mle2.options[names(args)] <<- args
-    value <- .Mle2.options[names(args)]
-  } else value <- .Mle2.options[unlist(args)]
+    .mymle.options[names(args)] <<- args
+    value <- .mymle.options[names(args)]
+  } else value <- .mymle.options[unlist(args)]
    if (single) value <- value[[1]]
 if (setvals) invisible(value) else value
 }
 
+## FIXME: problem with bounds and formulae!
+calc_mle2_function <- function(formula,
+                               parameters,
+                               links,
+                               start,
+                               parnames,
+                               use.deriv=FALSE,
+                               data=NULL,
+                               trace=FALSE) {
+  ## resid=FALSE
+  ##  stub: what was I going to use this for ???
+  ##  returning residuals rather than mle (e.g. for minpack.nls??)
+  RHS <- formula[[3]]
+  ddistn <- as.character(RHS[[1]])
+  if (ddistn=="dnorm" && !("sd" %in% names(RHS))) {
+    warning("using dnorm() with sd implicitly set to 1 is rarely sensible")
+  }
+  if (ddistn=="dnbinom" && !("mu" %in% names(RHS))) {
+  }
+  ## need to check on variable order:
+  ## should it go according to function/formula,
+  ##   not start?
+  if (!is.list(data)) stop("must specify data argument",
+                           " (as a list or data frame)",
+                           " when using formula argument")
+  vecstart <- (is.numeric(start))
+  if (vecstart) start <- as.list(start) ## expand to a list
+  if (missing(parnames) || is.null(parnames)) {
+    parnames <- as.list(names(start))
+    names(parnames) <- names(start)
+  }
+  ## hack
+  if (!missing(parameters)) {
+    ## linear model specified for some parameters
+    vars <- as.character(sapply(parameters,"[[",2))
+    if (length(parameters)>1) {
+      models <-  sapply(parameters,function(z) call.to.char(z[[3]]))
+    } else {
+      models <- as.character(parameters)
+    }
+    models <- gsub(" ","",models)
+    parameters <- parameters[models!="1"]
+    npars <- length(parameters)
+    if (npars==0) { ## no non-constant parameters
+      parameters <- mmats <- vpos <- NULL
+    } else {
+      ## BUG IN HERE SOMEWHERE, FIXME: SENSITIVE TO ORDER OF 'start'
+      mmats <- list()
+      vpos <- list()
+      pnames0 <- parnames
+      names(parnames) <- parnames
+      for (i in seq(along=parameters)) {
+        vname <- vars[i]      ## name of variable
+        p <- parameters[[i]]  ## formula for variable
+        p[[2]] <- NULL
+        mmat <- model.matrix(p,data=data)     
+        pnames <- paste(vname,colnames(mmat),sep=".")
+        parnames[[vname]] <- pnames ## insert into parameter names
+        vpos0 <- which(pnames0==vname)
+        vposvals <- cumsum(sapply(parnames,length))
+        ## fill out start vectors with zeros or replicates as appropriate
+        if (length(start[[vname]])==1) {
+          if (length(grep("-1",models[i])>0)) {
+            start[[vname]] <- rep(start[[vname]],length(pnames))
+          } else {
+            start[[vname]] <- c(start[[vname]],rep(0,length(pnames)-1))
+          }
+        }
+        ## fix: what if parameters are already correctly specified?
+        startpos <- if (vpos0==1) 1 else vposvals[vpos0-1]+1
+        vpos[[vname]] <- startpos:vposvals[vpos0]
+        mmats[[vname]] <- mmat
+      }
+    }
+  } else parameters <- vars <- mmats <- vpos <- NULL
+  if (!missing(links)) {
+    stop("parameter link functions not yet implemented")
+    for (i in length(links)) {
+    }
+  }
+  parnames <- unlist(parnames)
+  start <- as.list(unlist(start)) ## collapse/re-expand (WHY?)
+  names(start) <- parnames
+  arglist <- as.list(RHS[-1]) ## delete function name
+  arglist$parameters <- NULL
+  arglist1 <- c(list(x=formula[[2]]),arglist,list(log=TRUE))
+  arglist1  ## codetools check kluge
+  fn <- function() {
+    ## is there a better way to do this?
+    ## need to look for parameters etc.
+    pars <- unlist(as.list(match.call())[-1])
+    if (!is.null(parameters)) {
+      for (.i in seq(along=parameters)) {
+        assign(vars[.i],mmats[[.i]] %*% pars[vpos[[.i]]])
+      }
+    }
+    ## if (is.null(data) || !is.list(data))
+    ## stop("data argument must be specified when using formula interface")
+    ## BUG/FIXME: data evaluates to 'FALSE' at this point -- regardless of whether
+    ## it has been specified
+    ## FIXME: how to make this eval() less fragile???
+    ## sys.frame(sys.nframe()) specifies the number of the *current* frame
+    ## ... envir=data,enclos=parent.frame()
+    ## this actually works OK: fails enigmatically if we
+    ## 
+    arglist2 <- lapply(arglist1,eval,envir=data,
+                       enclos=sys.frame(sys.nframe()))
+    if (use.deriv) {
+      stop("use.deriv is not yet implemented")
+      ## browser()
+      ## minor hack -- should store information otherwise -- could have
+      ##  different numbers of arguments for different distributions?
+      LLform <- get(gsub("^d","s",as.character(RHS[[1]])))(NA,NA)$formula
+      avals <- as.list(formula[[3]][-1])
+      for (i in seq_along(avals))
+        LLform <- gsub(names(avals)[i],avals[[i]],LLform)
+      r <- eval(deriv(parse(text=LLform),parnames),envir=c(arglist2,data))
+    } else {
+      r <- -sum(do.call(ddistn,arglist2))
+    }
+    ## doesn't work yet -- need to eval arglist in the right env ...
+    ## if (debugfn) cat(unlist(arglist),r,"\n")
+    if (trace) cat(pars,r,"\n")
+    r
+  }
+  npars <- length(parnames)
+  flist <-  vector("list",npars)
+  names(flist) <- parnames
+  ## add additional parnames?
+  ## browser()
+  ## flist <- c(flist,setdiff(names(arglist),c("x","log",... ?))
+  formals(fn) <- flist
+  if (vecstart) start <- unlist(start)
+  list(fn=fn,start=start,parameters=parameters,
+       fdata=list(vars=vars,mmats=mmats,vpos=vpos,
+                  arglist1=arglist1,ddistn=ddistn,parameters=parameters),
+       parnames=parnames)
+}
 
-.Mle2.options = list(optim.method="BFGS",confint = "spline",optimizer="optim")
+.mymle.options = list(optim.method="BFGS",confint = "spline",optimizer="optim")

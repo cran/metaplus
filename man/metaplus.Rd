@@ -1,7 +1,7 @@
 \name{metaplus}
 \alias{metaplus}
 \title{
-Fits random effects meta-analysis models, using either a standard normal ditribution, a \eqn{t}-distribution or a mixture of normals for the random effect.
+Fits random effects meta-analysis models, using either a standard normal distribution, a \eqn{t}-distribution or a mixture of normals for the random effect.
 }
 \description{
 Allows fitting of random effects meta-analysis producing confidence intervals based on profile likelihood. Two methods of robust meta-analysis are included, based on either the \eqn{t}-distribution or normal-mixture distribution. 
@@ -10,7 +10,8 @@ Allows fitting of random effects meta-analysis producing confidence intervals ba
 metaplus(yi,sei,mods=NULL,random="normal",
       label=switch(random,"normal"="Random Normal","t-dist"="Random t-distribution",
         "mixture"="Random mixture"),
-      plotci=FALSE,justfit=FALSE,slab=1:length(yi),data)
+      plotci=FALSE,justfit=FALSE,slab=1:length(yi),
+      useAGQ=FALSE,quadpoints=21,data)
 }
 \arguments{
   \item{yi}{
@@ -36,6 +37,12 @@ Should model only be fitted? If justfit=TRUE then profiling and likelihood ratio
 }
   \item{slab}{
 Vector of character strings corresponding to each study.
+}
+  \item{useAGQ}{
+Use adaptive Gauss-Hermite quadrature when performing integration for t-distribution random-effects. Useful when standard errors for studies are relatively small.
+}
+  \item{quadpoints}{
+Number of quadrature points to use in adaptive Gauss-Hermite quadrature.
 }
   \item{data}{
 Optional data frame containing some or all other data.
@@ -75,7 +82,92 @@ Lee, K. J., & Thompson, S. G. (2008). Flexible parametric models for random effe
 Ken Beath <ken.beath@mq.edu.au>
 }
 \examples{
-cdp.meta <- metaplus(yi,sei,data=cdp)
+\dontrun{
+library(metaplus)
+
+# perform meta-analysis for mag studies, which have no outliers
+# fit standard normal random-effect model and print summary
+mag.meta <- metaplus(yi, sei, slab = study, data = mag)
+summary(mag.meta)
+# repeat, but this time plot the profile likelihood diagnostic plot using plotci
+mag.meta <- metaplus(mag$yi, mag$sei, slab = mag$study, plotci = TRUE)
+# plot a forest plot with exponential transform, so that the odds ratios are plotted
+plot(mag.meta, atransf = exp, at = log(c(.01, .1, 1, 10, 100)), xlab = "Odds Ratio",
+  cex = 0.75)
+# repeat for t-distribution random effects
+mag.tdist <- metaplus(yi, sei, slab = study,
+  random = "t-dist", data = mag)
+summary(mag.tdist)
+# use parametric bootstrap to test for presence of outliers
+summary(testOutliers(mag.tdist))
+# repeat for robust mixture random effects
+mag.mix <- metaplus(yi, sei, slab = study,
+  random = "mixture", data = mag)
+summary(mag.mix)
+# use parametric bootstrap to test for presence of outliers
+summary(testOutliers(mag.mix))
+
+
+# perform meta-analysis for CDP studies
+# where there is one outlier
+cdp.meta <- metaplus(yi, sei, slab = study, data = cdp)
 summary(cdp.meta)
+cdp.tdist <- metaplus(yi, sei, slab = study,
+  random = "t-dist", data = cdp)
+summary(cdp.tdist)
+summary(testOutliers(cdp.tdist))
+cdp.mix <- metaplus(yi, sei, slab = study,
+  random = "mixture", data = cdp)
+summary(cdp.mix)
+summary(testOutliers(cdp.mix))
+
+# extract and plot outlier probabilities
+cdp.mix.outlierProbs <- outlierProbs(cdp.mix)
+plot(cdp.mix.outlierProbs)
+
+# produce forest plot with summary for all 3 models, showing narrower confidence
+# intervals for robust models
+plot(cdp.meta, extrameta = list(cdp.tdist, cdp.mix), xlab = "Standardised Mean Difference")
+
+
+# effect of exercise on depression with covariate of length of study
+# fit the 3 models
+exercise.meta <- metaplus(smd, sqrt(varsmd),
+  mods = duration, slab = study, data = exercise)
+summary(exercise.meta)
+exercise.mix <- metaplus(smd, sqrt(varsmd),
+  mods = duration, slab = study, random = "mixture",
+  data = exercise)
+summary(exercise.mix)
+exercise.testOutliers <- testOutliers(exercise.mix)
+summary(exercise.testOutliers)
+
+# identify possible outliers
+exercise.outlierProbs <- outlierProbs(exercise.mix)
+plot(exercise.outlierProbs)
+
+# centre duration at different values to obtain predictions at 4, 8 and 12 weeks 
+exercise$duration4 <- exercise$duration-4
+exercise$duration8 <- exercise$duration-8
+exercise$duration12 <- exercise$duration-12
+
+# fit the different models, giving each an appropriate label
+exercise.nodurn <- metaplus(smd, sqrt(varsmd),
+  label = "Random Mixture (No Duration)", slab = study,
+  random = "mixture", data = exercise)
+exercise.wk4 <- metaplus(smd, sqrt(varsmd),
+  mods = duration4, label = "Random Mixture (Week 4)",
+  slab = study, random = "mixture", data = exercise)
+exercise.wk8 <- metaplus(smd, sqrt(varsmd),
+  mods = duration8, label = "Random Mixture (Week 8)",
+  slab = study, random = "mixture", data = exercise)
+exercise.wk12 <- metaplus(smd, sqrt(varsmd),
+  mods = duration12, label = "Random Mixture (Week 12)",
+  slab = study, random = "mixture", data = exercise)
+  
+# produce forest plot with summary for each model with robust mixture model at different weeks
+plot(exercise.nodurn, extrameta = list(exercise.wk4, exercise.wk8,
+  exercise.wk12), xlab = "Standardised mean difference")
 }
-\keyword{method}
+}
+\keyword{models}

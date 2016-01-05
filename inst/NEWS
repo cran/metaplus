@@ -1,3 +1,13 @@
+Changes in metaplus version 0.7-6
+
+  o added profile improvement introduced in 0.7-5 for normal models
+
+  o added option to perform  integration in the t-distribution models using adaptive Gauss-Hermite quadrature to improve accuracy with studies with small standard errors
+
+  o correctly name CDP studies
+
+  o documentation enhancements
+
 Changes in metaplus version 0.7-5
 
   o added data parameter to metaplus to indicate where data is, and changed all examples and documentation to use this

@@ -1,11 +1,12 @@
 \name{outlierProbs}
 \alias{outlierProbs}
+\alias{outlierProbs.metaplus}
 \title{
 Calculate outlier probabilities for each study.}
 \description{
 For the normal mixture random effect calculates the probability that each study is an outlier based on the posterior probability of it being an outlier.}
 \usage{
-outlierProbs(object)
+\method{outlierProbs}{metaplus}(object)
 }
 \arguments{
   \item{object}{
