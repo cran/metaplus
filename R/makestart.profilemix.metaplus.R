@@ -5,18 +5,18 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
     isreg <- !is.null(mods)
     
     rl2reg <- function(muhat,tau2,tau2out,lpoutlier,xcoef,yi,sei,mods,isreg,prop) {
-      poutlier <- exp(lpoutlier)/(1+exp(lpoutlier))
+            poutlier <- exp(lpoutlier)/(1+exp(lpoutlier))
       w <- 1.0/(tau2+sei^2)
-      if (isreg) ll1 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)+log(1-poutlier)
-      else ll1 <-  -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)+log(1-poutlier)
+      if (isreg) p1 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
+      else p1 <-  -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)
       w <- 1.0/(tau2out+sei^2)
-      if (isreg) ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)+log(poutlier)
-      else ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)+log(poutlier)
+      if (isreg) p2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
+      else p2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)
       if (!missing(prop)) {
-        ll <- prop*cbind(ll1,ll2)
+        ll <- prop*cbind(p1,p2)
         negll <- -sum(apply(l,1,sum))
       } else {
-        l <- exp(cbind(ll1,ll2))
+        l <- exp(cbind(log(1-poutlier)+p1,log(poutlier)+p2))
         negll <- -sum(log(apply(l,1,sum)))
       }
       if (is.nan(negll)) negll <- NA

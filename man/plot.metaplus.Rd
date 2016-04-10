@@ -20,6 +20,11 @@ Additional metaplus objects to be plotted. Only the summary statistic is plotted
 \value{
 Plot
 }
+\note{
+On some systems the alignment of characters in the CI may be poor when saving the plots to pdf. A solution is to use the extrafont package and a fixed width font, for eample Courier New. Then if creating the plot using pdf() the parameter family="Courier New" will use this font and fonts="Courier New" will add it to the pdf.
+
+An alternative is to use pdf.options() with the same parameters before the plot, and pdf.options(reset=TRUE) will produce the same effect.
+}
 \author{
 Ken Beath <ken.beath@mq.edu.au>
 }

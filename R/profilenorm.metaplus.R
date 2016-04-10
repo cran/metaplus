@@ -44,7 +44,8 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
                                    lower=lower.val)
   else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
                              optimizer="user",optimfun=myoptim,data=list(yi=yi,sei=sei),
-                             skip.hessian=TRUE,
+                             # ??? temporary
+                             skip.hessian=FALSE,
                              control=list(eval.max=1000),
                              lower=lower.val)
   
@@ -92,7 +93,8 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
                                            lower=lower.val,optimfun=myoptim)
         else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,optimizer="user",
                                      data=list(yi=yi,sei=sei),
-                                     skip.hessian=TRUE,
+                                     # ??? temporary
+                                     skip.hessian=FALSE,
                                      control=list(eval.max=1000),
                                      lower=lower.val,optimfun=myoptim)
         results <- profilenorm.fit@coef

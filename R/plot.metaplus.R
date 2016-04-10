@@ -28,7 +28,8 @@ plot.metaplus <- function(x,...,extrameta=NULL) {
   if (length(extravars)==0) addpoly(x=sumxi, ci.lb=sumci.lb,ci.ub=sumci.ub,mlab=mlab)
   else {
 # only pass relevent parameters to addpoly
-    extravars <- list(transf=extravars$transf,atransf=extravars$atransf,efac=extravars$efac,cex=extravars$cex)
+    extravars <- list(transf=extravars$transf,atransf=extravars$atransf,targs=extravars$targs,efac=extravars$efac,
+                      cex=extravars$cex,digits=extravars$digits)
     extravars <- extravars[!sapply(extravars, is.null)]
     extravars <- c(list(x=sumxi, ci.lb=sumci.lb,ci.ub=sumci.ub,mlab=mlab),extravars)
     do.call("addpoly",extravars)

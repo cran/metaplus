@@ -1,3 +1,11 @@
+Changes in metaplus version 0.7-7
+
+  o improved fitting for mixture models
+
+  o changed ordering of study labels for outlier probability plot to match ordering of forest plot
+
+  o added digits to parameters passed through from plot to summary lines
+
 Changes in metaplus version 0.7-6
 
   o added profile improvement introduced in 0.7-5 for normal models
