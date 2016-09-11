@@ -1,0 +1,17 @@
+citHeader("To cite the metaplus package in publications, please use:")
+
+bibentry(
+  bibtype="Article",
+	title = "{metaplus}: An {R} Package for the Analysis of Robust Meta-Analysis and Meta-Regression",
+	author = as.person("K. J. Beath [aut]"),
+	journal = "R Journal",
+	volume = 8,
+	number = 1,
+	pages = "5--16",
+	year = 2016,
+	url = "https://journal.r-project.org/archive/2016-1/beath.pdf",
+	textVersion = paste("Beath, K. J. (2016).",
+                       "metaplus: An R Package for the Analysis of Robust Meta-Analysis and Meta-Regression,",
+                       "R Journal, 8(1), 5-16.",
+                       "URL: https://journal.r-project.org/archive/2016-1/beath.pdf")
+)
