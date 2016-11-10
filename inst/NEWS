@@ -1,3 +1,13 @@
+Changes in metaplus version 0.7-9
+
+  o changed options for integration of t distribution models so hopefully Gauss-Hermite is never needed
+
+  o modified Hessian calculations to avoid possible bug
+
+  o added warning message about study second parameter
+
+  o updated vignette and added code
+
 Changes in metaplus version 0.7-8
 
   o updated citation to reflect publication in R Journal

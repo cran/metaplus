@@ -3,7 +3,7 @@
 \title{
 Summary of a metaplus object.}
 \description{
-Summarises the meta-analysis, giving the parameter estimates and goodness of fit statistics. For the robust methods this includes the values of the parameters relating to robustness. In the summary the 95% confidence intervals are calculated using the prfile likelihood method. To produce corresponding p-values these are obtained from the likelihood ratio test statistic.
+Summarises the meta-analysis, giving the parameter estimates and goodness of fit statistics. For the robust methods this includes the values of the parameters relating to robustness. In the summary the 95\% confidence intervals are calculated using the profile likelihood method. To produce corresponding p-values these are obtained from the likelihood ratio test statistic.
 }
 \usage{
 \method{summary}{metaplus}(object,...)

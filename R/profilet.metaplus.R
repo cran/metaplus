@@ -158,7 +158,7 @@ profilet.metaplus <-
                 vinv = vinv,
                 xcoef = xcoef,
                 subdivisions = 300L,
-                rel.tol = 1.0e-6
+                rel.tol = 1.0e-9
               )$value
             else
               integrate(
@@ -172,7 +172,7 @@ profilet.metaplus <-
                 tau2 = tau2,
                 vinv = vinv,
                 subdivisions = 300L,
-                rel.tol = 1.0e-6
+                rel.tol = 1.0e-9
               )$value
           },
           error = function(e) {
@@ -374,12 +374,13 @@ profilet.metaplus <-
           thehessian <- hessian(
             ll.profilet,
             results,
+            method.args=list(d=0.01),
             yi = yi,
             sei = sei,
             mods = mods
           )
         else
-          thehessian <- hessian(ll.profilet, results, yi = yi, sei = sei)
+          thehessian <- hessian(ll.profilet, results, method.args=list(d=0.01),yi = yi, sei = sei)
         
         isproblem <-
           ((results < 1.0e-6) &

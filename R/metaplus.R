@@ -1,7 +1,7 @@
 .onAttach <-
   function (libname, pkgname) 
   {
-    loadmsg <- "\nNote that there are changes to the names of some functions in version 0.7.5. See NEWS.\n"
+    loadmsg <- "\nNote: The second parameter is the study standard error not the standard error squared as in the metafor package.\n"
     packageStartupMessage(loadmsg, domain = NULL, appendLF = TRUE)
   }
 

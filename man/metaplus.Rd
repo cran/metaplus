@@ -18,7 +18,7 @@ metaplus(yi,sei,mods=NULL,random="normal",
 vector of observed effect size
 }
   \item{sei}{
-vector of observed standard errors
+vector of observed standard errors (note: not standard errors squared)
 }
   \item{mods}{
 data frame of covariates corresponding to each study

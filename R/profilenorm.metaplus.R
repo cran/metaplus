@@ -44,8 +44,7 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
                                    lower=lower.val)
   else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
                              optimizer="user",optimfun=myoptim,data=list(yi=yi,sei=sei),
-                             # ??? temporary
-                             skip.hessian=FALSE,
+                             skip.hessian=TRUE,
                              control=list(eval.max=1000),
                              lower=lower.val)
   
@@ -58,8 +57,8 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
   if (!justfit)  {
     notprofiled <- TRUE
     while (notprofiled) {
-       if (isreg) thehessian <- hessian(ll.profilenorm,results,yi=yi,sei=sei,mods=as.matrix(mods))
-      else thehessian <- hessian(ll.profilenorm,results,yi=yi,sei=sei)
+       if (isreg) thehessian <- hessian(ll.profilenorm,results,method.args=list(d=0.01),yi=yi,sei=sei,mods=as.matrix(mods))
+      else thehessian <- hessian(ll.profilenorm,results,method.args=list(d=0.01),yi=yi,sei=sei)
       if (results[2] < 1.0e-6) {
         myse <- suppressWarnings(sqrt(diag(ginv(thehessian[-2,-2]))))
         if (length(myse)==1) myse <- c(myse,0.0)
@@ -93,8 +92,7 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
                                            lower=lower.val,optimfun=myoptim)
         else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,optimizer="user",
                                      data=list(yi=yi,sei=sei),
-                                     # ??? temporary
-                                     skip.hessian=FALSE,
+                                      skip.hessian=TRUE,
                                      control=list(eval.max=1000),
                                      lower=lower.val,optimfun=myoptim)
         results <- profilenorm.fit@coef

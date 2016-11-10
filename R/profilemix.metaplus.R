@@ -57,8 +57,8 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
   if (!justfit)  {
     notprofiled <- TRUE
     while (notprofiled) {
-      if (isreg) thehessian <- hessian(ll.profilemix,results,yi=yi,sei=sei,mods=mods)
-      else thehessian <- hessian(ll.profilemix,results,yi=yi,sei=sei)
+      if (isreg) thehessian <- hessian(ll.profilemix,results,method.args=list(d=0.01),yi=yi,sei=sei,mods=mods)
+      else thehessian <- hessian(ll.profilemix,results,method.args=list(d=0.01),yi=yi,sei=sei)
       # tau2 and tau2out can be zero 
       #browser()
       isproblem <- (results<1.0e-6) & ((1:length(results) %in% c(2,3)))
