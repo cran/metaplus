@@ -45,7 +45,7 @@ profilet.metaplus <-
           else {
             if (isreg)
               onell <-
-                -(oney - muhat - matrix(onemods, nrow = 1) %*% xcoef - nu) ^ 2 / (2 * onesigma2) -
+                -(as.vector(oney - muhat - matrix(onemods, nrow = 1) %*% xcoef) - nu) ^ 2 / (2 * onesigma2) -
                 log(sqrt(tau2)) + dt(nu / sqrt(tau2), df = 1.0 / vinv, log = TRUE)
             else
               onell <-
@@ -257,13 +257,12 @@ profilet.metaplus <-
         ll.profilet,
         start = start.null,
         vecpar = TRUE,
-        optimizer = "user",
         data = list(yi = yi, sei = sei, mods =
                       mods),
         skip.hessian = TRUE,
-        control = list(eval.max = 1000),
+        #control = list(eval.max = 1000),
         lower = lower.val,
-        optimfun = myoptim
+        optimizer="user",optimfun=myoptim,
       )
     else
       maxfit <-
@@ -271,12 +270,11 @@ profilet.metaplus <-
         ll.profilet,
         start = start.null,
         vecpar = TRUE,
-        optimizer = "user",
         data = list(yi = yi, sei = sei),
         skip.hessian = TRUE,
-        control = list(eval.max = 1000),
+        #control = list(eval.max = 1000),
         lower = lower.val,
-        optimfun = myoptim
+        optimizer="user",optimfun=myoptim,
       )
     
     maxll <- logLik(maxfit)
@@ -289,14 +287,12 @@ profilet.metaplus <-
             ll.profilet,
             start = start.val,
             vecpar = TRUE,
-            optimizer = "user",
             data = list(yi = yi, sei =
                           sei, mods = mods),
             skip.hessian = TRUE,
-            control = list(eval.max =
-                             1000),
+            #control = list(eval.max =1000),
             lower = lower.val,
-            optimfun = myoptim
+            optimizer="user",optimfun=myoptim,
           )
       else
         profilet.fit <-
@@ -304,14 +300,12 @@ profilet.metaplus <-
             ll.profilet,
             start = start.val,
             vecpar = TRUE,
-            optimizer = "user",
             data = list(yi = yi, sei =
                           sei),
             skip.hessian = TRUE,
-            control = list(eval.max =
-                             1000),
+            #control = list(eval.max = 1000),
             lower = lower.val,
-            optimfun = myoptim
+            optimizer="user",optimfun=myoptim,
           )
       # print(vinv)
       # print(profilet.fit)
@@ -332,16 +326,14 @@ profilet.metaplus <-
         ll.profilet,
         start = newstart.val,
         vecpar = TRUE,
-        optimizer = "user",
         data = list(yi = yi, sei =
                       sei, mods = mods),
         skip.hessian = TRUE,
-        control = list(eval.max =
-                         1000),
+       # control = list(eval.max = 1000),
         lower = newlower.val,
         fixed = list(tau2 =
                        0.0, vinv = 0.0),
-        optimfun = myoptim
+        optimizer="user",optimfun=myoptim,
       )
     else
       profilet.fit2 <-
@@ -349,16 +341,14 @@ profilet.metaplus <-
         ll.profilet,
         start = newstart.val,
         vecpar = TRUE,
-        optimizer = "user",
         data = list(yi = yi, sei =
                       sei),
         skip.hessian = TRUE,
-        control = list(eval.max =
-                         1000),
+        #control = list(eval.max = 1000),
         lower = newlower.val,
         fixed = list(tau2 = 0.0, vinv =
                        0.0),
-        optimfun = myoptim
+        optimizer="user",optimfun=myoptim,
       )
     if (logLik(profilet.fit2) > logLik(profilet.fit)) {
       profilet.fit@coef <- coef(profilet.fit2)
@@ -430,16 +420,15 @@ profilet.metaplus <-
               ll.profilet,
               start = start.val,
               vecpar = TRUE,
-              optimizer = "user",
               data = list(
                 yi = yi,
                 sei = sei,
                 mods = mods
               ),
               skip.hessian = TRUE,
-              control = list(eval.max = 1000),
+              #control = list(eval.max = 1000),
               lower = lower.val,
-              optimfun = myoptim
+              optimizer="user",optimfun=myoptim,
             )
           else
             profilet.fit <-
@@ -447,12 +436,11 @@ profilet.metaplus <-
               ll.profilet,
               start = start.val,
               vecpar = TRUE,
-              optimizer = "user",
               data = list(yi = yi, sei = sei),
               skip.hessian = TRUE,
-              control = list(eval.max = 1000),
+              #control = list(eval.max = 1000),
               lower = lower.val,
-              optimfun = myoptim
+              optimizer="user",optimfun=myoptim,
             )
           results <- profilet.fit@coef
         }
@@ -491,22 +479,22 @@ profilet.metaplus <-
           doprofile <-
           paste(
             "profilet.fit0 <- mymle(ll.profilet,start=newstart.val,vecpar=TRUE,\n",
-            "optimizer=\"user\",data=list(yi=yi,sei=sei,mods=mods),\n",
+            "optimizer=\"user\",optimfun=myoptim,data=list(yi=yi,sei=sei,mods=mods),\n",
             "skip.hessian=TRUE,\n",
             "lower=newlower.val,fixed=list(",
             fixedparm,
-            "=0.0),optimfun=myoptim)",
+            "=0.0))",
             sep = ""
           )
         else
           doprofile <-
           paste(
             "profilet.fit0 <- mymle(ll.profilet,start=newstart.val,vecpar=TRUE,\n",
-            "optimizer=\"user\",data=list(yi=yi,sei=sei),\n",
+            "optimizer=\"user\",optimfun=myoptim,data=list(yi=yi,sei=sei),\n",
             "skip.hessian=TRUE,\n",
             "lower=newlower.val,fixed=list(",
             fixedparm,
-            "=0.0),optimfun=myoptim)",
+            "=0.0))",
             sep = ""
           )
         eval(parse(text = doprofile))

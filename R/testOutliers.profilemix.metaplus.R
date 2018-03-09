@@ -34,7 +34,7 @@ testOutliers.profilemix.metaplus <- function(object,R=999) {
     return(data)
   }
   
-  meta.ml <- rma(yi=object$yi, sei=object$sei, mods=object$mods, method="DL")
+  meta.ml <- rma(yi=object$yi, sei=object$sei, mods=object$mods, method="ML")
   
   meta.boot <- boot(data=cbind(object$yi,object$sei,object$mods), meta.fun, R = R, sim = "parametric",
                     ran.gen = meta.rg, mle=meta.ml)

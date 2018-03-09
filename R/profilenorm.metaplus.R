@@ -38,14 +38,16 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
   start.val <- start.val+0.001
   
   if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
-                                   optimizer="user",optimfun=myoptim,data=list(yi=yi,sei=sei,mods=as.matrix(mods)),
+                                   optimizer="user",optimfun=myoptim,
+                                   data=list(yi=yi,sei=sei,mods=as.matrix(mods)),
                                    skip.hessian=TRUE,
-                                   control=list(eval.max=1000),
+  #                                 control=list(eval.max=1000),
                                    lower=lower.val)
   else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
-                             optimizer="user",optimfun=myoptim,data=list(yi=yi,sei=sei),
+                                optimizer="user",optimfun=myoptim,
+                                data=list(yi=yi,sei=sei),
                              skip.hessian=TRUE,
-                             control=list(eval.max=1000),
+ #                            control=list(eval.max=1000),
                              lower=lower.val)
   
   if (profilenorm.fit@details$convergence!=0) warning(paste("convergence failed: ",profilenorm.fit@details$message,sep="",))
@@ -85,16 +87,17 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
         parnames(ll.profilenorm) <- thenames
         names(start.val) <- thenames
         names(lower.val) <- thenames
-        if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,optimizer="user",
+        if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
                                            data=list(yi=yi,sei=sei,mods=mods),
                                            skip.hessian=TRUE,
+                                           optimizer="user",optimfun=myoptim,
                                            control=list(eval.max=1000),
-                                           lower=lower.val,optimfun=myoptim)
-        else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,optimizer="user",
+                                           lower=lower.val)
+        else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
                                      data=list(yi=yi,sei=sei),
                                       skip.hessian=TRUE,
                                      control=list(eval.max=1000),
-                                     lower=lower.val,optimfun=myoptim)
+                                     lower=lower.val,optimizer="user",optimfun=myoptim,)
         results <- profilenorm.fit@coef
       }
     }
@@ -130,11 +133,11 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
 #      newlower.val <- lower.val[-iparm]
 		newlower.val <- lower.val
       if (isreg) doprofile <- paste("profilenorm.fit0 <- mymle(ll.profilenorm,start=newstart.val,vecpar=TRUE,\n",
-                                    "optimizer=\"user\",optimfun=myoptim,data=list(yi=yi,sei=sei,mods=as.matrix(mods)),\n",
+                                    "optimizer='user'',optimfun=myoptim,data=list(yi=yi,sei=sei,mods=as.matrix(mods)),\n",
                                     "skip.hessian=TRUE,\n",
                                     "lower=newlower.val,fixed=list(",fixedparm,"=0.0))",sep="")
       else doprofile <- paste("profilenorm.fit0 <- mymle(ll.profilenorm,start=newstart.val,vecpar=TRUE,\n",
-                              "optimizer=\"user\",optimfun=myoptim,data=list(yi=yi,sei=sei),\n",
+                              "optimizer='user',optimfun=myoptim,,data=list(yi=yi,sei=sei),\n",
                               "skip.hessian=TRUE,\n",
                               "lower=newlower.val,fixed=list(",fixedparm,"=0.0))",sep="")
       eval(parse(text=doprofile))

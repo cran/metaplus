@@ -41,11 +41,13 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
   names(start.val) <- thenames
   names(lower.val) <- names(start.val)
   parnames(ll.profilemix) <- names(start.val)
-  if (isreg) profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="user",optimfun=myoptim,
-                                     skip.hessian=TRUE,
+  if (isreg)  profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,
+                                      optimizer="user",optimfun=myoptim,
+                                      skip.hessian=TRUE,
                                      data=list(yi=yi,sei=sei,mods=mods),
                                      lower=lower.val)
-  else profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="user",optimfun=myoptim,
+    else profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,
+    							optimizer="user",optimfun=myoptim,
                                skip.hessian=TRUE,
                                data=list(yi=yi,sei=sei),
                                lower=lower.val)
@@ -90,16 +92,18 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
         parnames(ll.profilemix) <- thenames
         names(start.val) <- thenames
         names(lower.val) <- thenames
-        if (isreg) profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="user",
+        if (isreg) profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,
+                                           optimizer="user",optimfun=myoptim,
                                            data=list(yi=yi,sei=sei,mods=mods),
                                            skip.hessian=TRUE,
-                                           control=list(eval.max=1000),
-                                           lower=lower.val,optimfun=myoptim)
-        else profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,optimizer="user",
+                                           #control=list(eval.max=1000),
+                                           lower=lower.val)
+        else profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,
+                                     optimizer="user",optimfun=myoptim,
                                      data=list(yi=yi,sei=sei),
                                      skip.hessian=TRUE,
-                                     control=list(eval.max=1000),
-                                     lower=lower.val,optimfun=myoptim)
+                                     #control=list(eval.max=1000),
+                                     lower=lower.val)
         results <- profilemix.fit@coef
       }
     }
@@ -137,11 +141,11 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
       #      newstart.val <- newstart.val[-iparm]
       newlower.val <- lower.val
       if (isreg) doprofile <- paste("profilemix.fit0 <- mymle(ll.profilemix,start=newstart.val,vecpar=TRUE,\n",
-                                    "optimizer=\"user\",optimfun=myoptim,data=list(yi=yi,sei=sei,mods=mods),\n",
+                                    "optimizer='user',optimfun=myoptim,data=list(yi=yi,sei=sei,mods=mods),\n",
                                     "skip.hessian=TRUE,\n",
                                     "lower=newlower.val,fixed=list(",fixedparm,"=0.0))",sep="")
       else doprofile <- paste("profilemix.fit0 <- mymle(ll.profilemix,start=newstart.val,vecpar=TRUE,\n",
-                              "optimizer=\"user\",optimfun=myoptim,data=list(yi=yi,sei=sei),\n",
+                              "optimizer='user',optimfun=myoptim,data=list(yi=yi,sei=sei),\n",
                               "skip.hessian=TRUE,\n",
                               "lower=newlower.val,fixed=list(",fixedparm,"=0.0))",sep="")
       eval(parse(text=doprofile))
