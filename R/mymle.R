@@ -95,6 +95,7 @@ mymle <- function(minuslogl,
   call$lower <- eval.parent(call$lower)
   #browser()
   call$gr <- eval.parent(call$gr)
+  # kjb is this what fixes problem with Nelder_mead?
   call$optimfun <- eval.parent(call$optimfun)
   ## FIX based on request from Mark Clements
   ## call$control$parscale <- eval.parent(call$control$parscale)

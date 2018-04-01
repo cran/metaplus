@@ -133,11 +133,11 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
 #      newlower.val <- lower.val[-iparm]
 		newlower.val <- lower.val
       if (isreg) doprofile <- paste("profilenorm.fit0 <- mymle(ll.profilenorm,start=newstart.val,vecpar=TRUE,\n",
-                                    "optimizer='user'',optimfun=myoptim,data=list(yi=yi,sei=sei,mods=as.matrix(mods)),\n",
+                                    "optimizer='user',optimfun=myoptim,data=list(yi=yi,sei=sei,mods=as.matrix(mods)),\n",
                                     "skip.hessian=TRUE,\n",
                                     "lower=newlower.val,fixed=list(",fixedparm,"=0.0))",sep="")
       else doprofile <- paste("profilenorm.fit0 <- mymle(ll.profilenorm,start=newstart.val,vecpar=TRUE,\n",
-                              "optimizer='user',optimfun=myoptim,,data=list(yi=yi,sei=sei),\n",
+                              "optimizer='user',optimfun=myoptim,data=list(yi=yi,sei=sei),\n",
                               "skip.hessian=TRUE,\n",
                               "lower=newlower.val,fixed=list(",fixedparm,"=0.0))",sep="")
       eval(parse(text=doprofile))

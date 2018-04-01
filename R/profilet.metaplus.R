@@ -203,7 +203,7 @@ profilet.metaplus <-
         negll <- NA
       if (!is.finite(negll))
         negll <- NA
-      #    if (is.na(negll)) negll <- 1e100
+      if (is.na(negll)) negll <- 1e100
       return(negll)
     }
     

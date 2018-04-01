@@ -12,7 +12,7 @@ summary.metaplus <- function(object, ...) {
 
 print.summary.metaplus <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
   if (!inherits(x, "summary.metaplus"))
-    stop("Use only with 'metaplus' objects.\n")
+    stop("Use only with 'summary.metaplus' objects.\n")
   #  print.default(object$results,na.print="")
    printCoefmat(x$results,digits=digits, signif.stars=FALSE,cs.ind=1:3,tst.ind=integer(),P.values=TRUE,has.Pvalue=TRUE,
                eps.Pvalue=1.0e-4,na.print="",...)
