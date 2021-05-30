@@ -1,3 +1,13 @@
+Changes in metaplus version 1.0-1
+
+  o when performing bootstrap for testing for outliers in mixture model, don't use random starting values, just use suitable values based on the values from the null model
+
+Changes in metaplus version 1.0-0 (not released)
+
+  o use multiple cores for bootstrap and for multiple starting values for mixture model
+
+  o change number of sets of starting values to a fixed number
+  
 Changes in metaplus version 0.7-11
 
   o fixed bug in parsing which caused crash in normal profiling

@@ -8,8 +8,8 @@ Returns BIC for a metaplus object.
 \method{BIC}{metaplus}(object, \ldots)
 }
 \arguments{
-  \item{object}{metaplus object}
-  \item{\dots}{ additional argument; currently none are used. }
+ \item{object}{metaplus object}
+ \item{\dots}{ additional argument; currently none are used. }
 }
 \value{
 BIC of fitted model

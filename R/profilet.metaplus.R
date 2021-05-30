@@ -7,7 +7,7 @@ profilet.metaplus <-
            slab = NULL,
            useAGQ = FALSE,
            quadpoints = 21) {
-    ghrule <- gaussHermiteData(21)
+    ghrule <- gaussHermiteData(quadpoints)
     
     isreg <- !is.null(mods)
     
@@ -16,8 +16,6 @@ profilet.metaplus <-
     
     ll.profilet <- function(par, yi, sei, mods) {
       isreg <- !missing(mods)
-      
-      # browser()
       
       if (any(is.nan(par)))
         return(NA)
@@ -75,7 +73,6 @@ profilet.metaplus <-
           onemods <- x[3:length(x)]
         else
           onemods <- NULL
-        #browser()
         if (useAGQ) {
           # find mode about which to perform integration
           themode <- tryCatch({
@@ -110,7 +107,6 @@ profilet.metaplus <-
           error = function(e) {
             return(NA)
           })
-          #browser()
           theint <- tryCatch({
             if (isreg)
               aghQuad(
@@ -226,7 +222,6 @@ profilet.metaplus <-
       start.val <- c(start.meta$b[1, 1], start.meta$tau2, 0.5)
       lower.val <- c(-Inf, 0.0, 0.0)
     }
-    #browser()
     thenames <- c("muhat", "tau2", "vinv")
     if (isreg)
       thenames <- c(thenames, dimnames(mods)[[2]])
@@ -250,7 +245,6 @@ profilet.metaplus <-
     else
       start.null <- c(coef(normfit), 0.0)
     names(start.null)[3] <- "vinv"
-    #browser()
     if (isreg)
       maxfit <-
       mymle(
@@ -280,7 +274,6 @@ profilet.metaplus <-
     maxll <- logLik(maxfit)
     for (vinv in c(0.01, 0.05, 0.1, 0.2, 0.5, 1)) {
       start.val[3] <- vinv
-      #print(start.val)
       if (isreg)
         profilet.fit <-
           mymle(
@@ -307,8 +300,6 @@ profilet.metaplus <-
             lower = lower.val,
             optimizer="user",optimfun=myoptim,
           )
-      # print(vinv)
-      # print(profilet.fit)
       if (logLik(profilet.fit) > maxll) {
         maxfit <- profilet.fit
         maxll <- logLik(profilet.fit)
@@ -382,8 +373,6 @@ profilet.metaplus <-
         else
           thehessian2 <- thehessian[-isproblem2, -isproblem2]
         
-        #browser()
-        
         themyse <- suppressWarnings(sqrt(diag(ginv(thehessian2))))
         # expand back to original length
         myse <- rep(0, length(results))
@@ -401,7 +390,6 @@ profilet.metaplus <-
         if (class(profilet.profiled) == "profile.mymle")
           notprofiled <- FALSE
         else {
-          #browser()
           thenames <- c("muhat", "tau2", "vinv")
           start.val <- profilet.profiled@fullcoef
           if (isreg) {
@@ -410,7 +398,6 @@ profilet.metaplus <-
           } else {
             lower.val <- c(-Inf, 0.0, 0.0)
           }
-          #browser()
           parnames(ll.profilet) <- thenames
           names(start.val) <- thenames
           names(lower.val) <- thenames
@@ -445,7 +432,6 @@ profilet.metaplus <-
           results <- profilet.fit@coef
         }
       }
-      #browser()
       
       if (any(order(profilet.profiled@profile$muhat$z) != (1:length(profilet.profiled@profile$muhat$z))))
         warning(
@@ -458,8 +444,6 @@ profilet.metaplus <-
         tryCatch(
           plot(profilet.profiled),
           error = function(e) {
-            #browser()
-            #plot(profilet.profiled@profile$muhat$z,profilet.profiled@profile$muhat$par.vals[,1])
             print(paste("Error in CI plot: ", e))
           }
         )

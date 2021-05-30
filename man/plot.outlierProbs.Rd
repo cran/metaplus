@@ -10,7 +10,7 @@ Plots the outlier probability for each study, from an outlierProbs object.
 \method{plot}{outlierProbs}(x, ...)
 }
 \arguments{
-  \item{x}{
+ \item{x}{
 outlierProbs object to be plotted
 }
  \item{\ldots}{
@@ -23,8 +23,9 @@ Plot
 Ken Beath <ken.beath@mq.edu.au>
 }
 \examples{
-\dontrun{
-cdp.mix <- metaplus(yi,sei,plotci=TRUE,slab=study,random="mixture",data=cdp)
+\donttest{
+data(cdp)
+cdp.mix <- metaplus(yi, sei, plotci = TRUE, slab = study, random = "mixture", cores = 1, data = cdp)
 cdp.mix.outlierProbs <- outlierProbs(cdp.mix)
 plot(cdp.mix.outlierProbs)
 }

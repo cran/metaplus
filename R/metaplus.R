@@ -8,8 +8,12 @@
 metaplus <- function(yi,sei,mods=NULL,random="normal",
       label=switch(random,"normal"="Random Normal","t-dist"="Random t-distribution", "mixture"="Random mixture"),
       plotci=FALSE,justfit=FALSE,slab=1:length(yi),
-      useAGQ=FALSE,quadpoints=21,data) {
+      useAGQ=FALSE,quadpoints=21,notrials=20, cores = max(detectCores() %/% 2, 1), 
+      data) {
   if (!(random %in% c("normal","t-dist","mixture"))) stop("Unknown random effect type")
+  if ((random=="mixture") & (notrials<10)) stop("Must be at least 10 sets of random starting values for mixture models.")
+  if (cores<1) stop("Cores must be positive.")
+  
   if (missing(data)) 
     data <- NULL
   if (is.null(data)) {
@@ -40,10 +44,11 @@ metaplus <- function(yi,sei,mods=NULL,random="normal",
   if (!is.null(mods)) df <- df-dim(mods)[2]
   if (df<=1) stop("Insufficient studies to fit model")
   if ((df<=3) & (!justfit)) warning("Very few studies. Solution may be unstable.")
+  if (cores>1) loadNamespace("parallel")
   fit <- switch(random,
                 "normal"=profilenorm.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab),
-                "t-dist"=profilet.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab,useAGQ,quadpoints),
-                "mixture"=profilemix.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab))
+                "t-dist"=profilet.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab,useAGQ=useAGQ,quadpoints=quadpoints),
+                "mixture"=profilemix.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab,notrials=notrials,cores=cores))
   fit$label <- label
   class(fit) <- "metaplus"
   return(fit)

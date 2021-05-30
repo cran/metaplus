@@ -16,13 +16,23 @@ importFrom(numDeriv,hessian)
 importFrom("graphics", "abline", "dotchart")
 importFrom("methods", "new")
 importFrom("stats", "constrOptim", "deriv", "dt", "integrate", "model.matrix", "nlm", "nlminb", "optimize", "printCoefmat", "qchisq", "rnorm")
-importFrom("stats", "approx", "pnorm", "qnorm", "spline", "uniroot","optim")
+importFrom("stats", "approx", "pnorm", "qnorm", "spline", "uniroot","optim","runif")
 
 importFrom(MASS,ginv)
 
 importFrom(fastGHQuad,aghQuad,gaussHermiteData)
 
 importFrom(lme4,Nelder_Mead)
+
+importFrom(Rfast, rowMaxs)
+
+importFrom("parallel", "detectCores","makeCluster","stopCluster")
+
+importFrom("doParallel", "registerDoParallel")
+
+importFrom("foreach", "foreach", "%dopar%")
+
+importFrom("doRNG", "%dorng%")
 
 S3method(plot, metaplus)
 S3method(summary, metaplus)

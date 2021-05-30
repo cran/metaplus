@@ -9,7 +9,7 @@ For the normal mixture random effect calculates the probability that each study 
 \method{outlierProbs}{metaplus}(object)
 }
 \arguments{
-  \item{object}{
+ \item{object}{
 A metaplus object with a mixture (robust) random effects distribution.
 }
 }
@@ -24,8 +24,9 @@ The outlier probabilities are obtained as the posterior probabilities of each st
 Ken Beath <ken.beath@mq.edu.au>
 }
 \examples{
-\dontrun{
-cdp3 <- metaplus(cdp$yi,cdp$sei,plotci=TRUE,slab=cdp$study,random="mixture")
+\donttest{
+data(cdp)
+cdp3 <- metaplus(yi, sei, plotci = TRUE, slab = study, random = "mixture", cores = 1, data = cdp)
 cdp3.outlierProbs <- outlierProbs(cdp3)
 plot(cdp3.outlierProbs)
 }

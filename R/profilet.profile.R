@@ -59,18 +59,13 @@ setMethod("profilet.profile", "mymle",
                 start <- save.start
                 if (length(start) >= 3) start <- c(start[1:2],vinv=vinv,start[3:length(start)])
                 else start <- c(start,vinv=vinv)
-                #browser()
                 #start <- start[-i]
                 call$start <- start
-                #browser()
-                if (skiperrs) {
+                 if (skiperrs) {
                   pfit <- try(eval.parent(call, 2L), silent=TRUE)
                 } else {
                   pfit <- eval.parent(call, 2L)
                 }
-                
-                #print(profilet.fit)
-                #browser()
                 if (logLik(pfit) > maxll) {
                   maxfit <- pfit
                   maxll <- logLik(pfit)
@@ -105,7 +100,6 @@ setMethod("profilet.profile", "mymle",
                             "so original fit had not converged:\n")
                     message(sprintf("(new deviance=%1.4g, old deviance=%1.4g, diff=%1.4g)",
                                     2*pfit@min,2*fitted@min,2*(pfit@min-fitted@min)),"\n")
-                    #browser()
                     message("Returning better fit ...\n")
                     ## need to return parameters all the way up
                     ##   to top level
@@ -124,7 +118,6 @@ setMethod("profilet.profile", "mymle",
             } ## end onestep
             ## Profile the likelihood around its maximum
             ## Based on profile.glm in MASS
-            #browser()
              summ <- summary(fitted)
             if (missing(std.err)) {
               std.err <- summ@coef[, "Std. Error"]
@@ -138,7 +131,6 @@ setMethod("profilet.profile", "mymle",
             if (any(is.na(std.err))) {
               std.err[is.na(std.err)] <- sqrt(1/diag(fitted@details$hessian))[is.na(std.err)]
               if (any(is.na(std.err))) {  ## still bad
-                #browser()
                 stop("Hessian is ill-behaved or missing, ",
                      "can't find an initial estimate of std. error ",
                      "(consider specifying std.err in profile call)")
@@ -169,8 +161,6 @@ setMethod("profilet.profile", "mymle",
             }
             if (!missing(prof.lower)) prof.lower <- xf(prof.lower)
             if (!missing(prof.upper)) prof.upper <- xf(prof.upper)
-            ## cat("upper\n")
-            ## print(upper)
             stop_msg <- list()
             for (i in which) {
               zi <- 0

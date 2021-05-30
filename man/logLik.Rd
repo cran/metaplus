@@ -8,8 +8,8 @@ Returns the log Likelihood for a metaplus object.
 \method{logLik}{metaplus}(object, \ldots)
 }
 \arguments{
-  \item{object}{metaplus object}
-  \item{\dots}{ additional argument; currently none are used. }
+ \item{object}{metaplus object}
+ \item{\dots}{ additional argument; currently none are used. }
 }
 \value{
 The loglikelihood of the fitted model.

@@ -8,8 +8,8 @@ Returns AIC for a metaplus object.
 \method{AIC}{metaplus}(object, \ldots)
 }
 \arguments{
-  \item{object}{metaplus object}
-  \item{\dots}{ additional argument; currently none are used. }
+ \item{object}{metaplus object}
+ \item{\dots}{ additional argument; currently none are used. }
 }
 \value{
 AIC of fitted model

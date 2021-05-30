@@ -93,7 +93,7 @@ mymle <- function(minuslogl,
   call$data <- eval.parent(call$data)
   call$upper <- eval.parent(call$upper)
   call$lower <- eval.parent(call$lower)
-  #browser()
+
   call$gr <- eval.parent(call$gr)
   # kjb is this what fixes problem with Nelder_mead?
   call$optimfun <- eval.parent(call$optimfun)
@@ -131,7 +131,7 @@ mymle <- function(minuslogl,
   if(any(! nfix %in% nfull))
     stop("some named arguments in 'fixed' are not arguments to the specified log-likelihood function")
   if (length(nfix)>0) start[nfix] <- NULL
-  # browser()
+
   # ?????? need to set only the ones that are there
   lower <- call$lower[names(start)]
   upper <- call$upper[names(start)]
@@ -146,7 +146,6 @@ mymle <- function(minuslogl,
   lu <- length(upper)
   npnfix <- sum(!nfull %in% nfix)
   if (!npnfix==0 && (lu>npnfix || lc>npnfix )) {
-    #browser()
     warning("length mismatch between lower/upper ",
             "and number of non-fixed parameters: ",
             "# lower=",lc,", # upper=",lu,", # non-fixed=",npnfix)
@@ -191,16 +190,12 @@ mymle <- function(minuslogl,
   objectivefunction <- function(p){
       if (browse_obj) browser()
       ## if (named)
-      #browser()
       names(p) <- nstart[order(oo)] ## make sure to reorder
       # this has been moved from before the reorder
       l <- relist2(p,template) ## redo list structure
       ## ??? useless, comes after l is constructed ???
       l[nfix] <- fixed
-      ##    cat("p\n"); print(p)
-      ## cat("l\n"); print(l)
-      ##    cat("data\n"); print(data)
-      if (vecpar) {
+       if (vecpar) {
           ## if (named)
           l <- namedrop(l[nfull])
           l <- unlist(l)
@@ -584,7 +579,6 @@ calc_mle2_function <- function(formula,
                        enclos=sys.frame(sys.nframe()))
     if (use.deriv) {
       stop("use.deriv is not yet implemented")
-      ## browser()
       ## minor hack -- should store information otherwise -- could have
       ##  different numbers of arguments for different distributions?
       LLform <- get(gsub("^d","s",as.character(RHS[[1]])))(NA,NA)$formula
@@ -604,7 +598,6 @@ calc_mle2_function <- function(formula,
   flist <-  vector("list",npars)
   names(flist) <- parnames
   ## add additional parnames?
-  ## browser()
   ## flist <- c(flist,setdiff(names(arglist),c("x","log",... ?))
   formals(fn) <- flist
   if (vecstart) start <- unlist(start)

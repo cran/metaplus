@@ -13,7 +13,7 @@ setGeneric("profilemix.profile", function(fitted, which = 1:p, maxsteps = 100,
                                           del = zmax/5, trace = FALSE, skiperrs=TRUE,
                                           std.err, tol.newmin = 0.001, debug=FALSE,
                                           prof.lower, prof.upper, skip.hessian=TRUE,
-                                          try_harder=FALSE, ...) { standardGeneric("profilemix.profile")})
+                                          try_harder=FALSE, notrials, cores, ...) { standardGeneric("profilemix.profile")})
 
 
 setMethod("profilemix.profile", "mymle",
@@ -22,7 +22,7 @@ setMethod("profilemix.profile", "mymle",
                     del = zmax/5, trace = FALSE, skiperrs=TRUE,
                     std.err, tol.newmin = 0.001, debug=FALSE,
                     prof.lower, prof.upper, skip.hessian=TRUE,
-                    try_harder=FALSE, ...) {
+                    try_harder=FALSE, notrials, cores, ...) {
             ## fitted: mle2 object
             ## which: which parameters to profile (numeric or char)
             ## maxsteps: steps to take looking for zmax
@@ -52,8 +52,7 @@ setMethod("profilemix.profile", "mymle",
               names(fix) <- p.i
               if (is.null(call$fixed)) call$fixed <- fix
               else call$fixed <- c(eval(call$fixed),fix)
-              #print(call$fixed)
-              start <- makestart.profilemix.metaplus(call$data$yi,call$data$sei,mods=call$data$mods,fixed=call$fixed)$params
+               start <- makestart.profilemix.metaplus(call$data$yi,call$data$sei,mods=call$data$mods,fixed=call$fixed,notrials=notrials,cores=cores)$params
               start <- unlist(start)
               names(start) <- names(call$start)
               call$start <- as.list(start)
@@ -99,7 +98,6 @@ setMethod("profilemix.profile", "mymle",
                 } else {
                   z <- sgn * sqrt(zz)
                 }
-                #print(c(z,logLik(pfit),coef(pfit)))
                 pvi <<- rbind(pvi, ri)
                 zi <<- c(zi, z) ## nb GLOBAL set
               }
@@ -112,7 +110,7 @@ setMethod("profilemix.profile", "mymle",
             updatefitted <- FALSE
             while (notfinished) {
               newpars_found <- FALSE
-              tryCatch({              
+              tryCatch({
                 summ <- summary(fitted)
                 if (missing(std.err)) {
                   std.err <- summ@coef[, "Std. Error"]
@@ -156,8 +154,6 @@ setMethod("profilemix.profile", "mymle",
                 }
                 if (!missing(prof.lower)) prof.lower <- xf(prof.lower)
                 if (!missing(prof.upper)) prof.upper <- xf(prof.upper)
-                ## cat("upper\n")
-                ## print(upper)
                 stop_msg <- list()
                 for (i in which) {
                   zi <- 0

@@ -23,7 +23,6 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
     start.val <- c(start.meta$b[1,1],start.meta$tau2,start.meta$b[2:dim(start.meta$b)[1],1])
     lower.val <- c(-Inf,0.0,rep(-Inf,dim(mods)[2]))
   } else {
-    #browser()
     start.meta <- rma(yi=yi, sei=sei, method="DL")
     start.val <- c(start.meta$b[1,1],start.meta$tau2)
     lower.val <- c(-Inf,0.0)
@@ -69,12 +68,9 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
       
       if (isreg) whichp <- c(1,3:(2+dim(mods)[2]))
       else whichp <- 1
-      #browser()
-      #profilenorm.profiled <- profile(profilenorm.fit,which=whichp,std.err=myse,del=0.5)
       profilenorm.profiled <- profile(profilenorm.fit,which=whichp,std.err=myse)
       if (class(profilenorm.profiled) == "profile.mymle") notprofiled <- FALSE
       else {
-        #browser()
         thenames <- c("muhat","tau2")
         start.val <- profilenorm.profiled@fullcoef
         if (isreg) {
@@ -83,7 +79,6 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
         } else {
           lower.val <- c(-Inf,0.0)
         }
-        #browser()
         parnames(ll.profilenorm) <- thenames
         names(start.val) <- thenames
         names(lower.val) <- thenames
@@ -108,8 +103,6 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
     if (plotci) {
       tryCatch(plot(profilenorm.profiled),
                error= function(e) {
-                 #browser()
-                 #plot(profilenorm.profiled@profile$muhat$z,profilenorm.profiled@profile$muhat$par.vals[,1])
                  print(paste("Error in CI plot: ",e))
                })
     }

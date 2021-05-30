@@ -7,22 +7,23 @@ Data for a meta-analysis of intravenous magnesium in acute myocardial infarction
 }
 \usage{mag}
 \format{
-  A data frame with 16 observations on the following 3 variables.
-  \describe{
-    \item{\code{study}}{study author}
-    \item{\code{yi}}{study effect estimate}
-    \item{\code{sei}}{study standard error}
-  }
+ A data frame with 16 observations on the following 3 variables.
+ \describe{
+ \item{\code{study}}{study author}
+ \item{\code{yi}}{study effect estimate}
+ \item{\code{sei}}{study standard error}
+ }
 }
 \source{
-  Sterne et al (2001)
-  }
+ Sterne et al (2001)
+ }
 \references{
 Sterne, J. A. C., Bradburn, M. J., & Egger, M. (2001). Meta-analysis in Stata. In M. Egger, G. D. Smith, & D. G. Altman (Eds.), Systematic Reviews in Health Care: Meta-Analysis in Context (pp. 347-369). BMJ Publishing Group.}
 
 \examples{
-\dontrun{
-mag1 <- metaplus(yi,sei,plotci=TRUE,slab=study,data=mag)
+\donttest{
+data(mag)
+mag1 <- metaplus(yi, sei, plotci = TRUE, slab = study, cores = 1, data = mag)
 }
 }
 \keyword{datasets}

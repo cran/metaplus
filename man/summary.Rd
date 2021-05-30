@@ -6,12 +6,12 @@ Summary of a metaplus object.}
 Summarises the meta-analysis, giving the parameter estimates and goodness of fit statistics. For the robust methods this includes the values of the parameters relating to robustness. In the summary the 95\% confidence intervals are calculated using the profile likelihood method. To produce corresponding p-values these are obtained from the likelihood ratio test statistic.
 }
 \usage{
-\method{summary}{metaplus}(object,...)
+\method{summary}{metaplus}(object, ...)
 }
 \arguments{
-  \item{object}{
+ \item{object}{
 metaplus object to summarise.}
-  \item{\dots}{
+ \item{\dots}{
 Additional parameters to summary.}
 }
 \value{
@@ -22,7 +22,8 @@ Additional parameters to summary.}
 Ken Beath <ken.beath@mq.edu.au>
 }
 \examples{
-cdp1 <- metaplus(yi,sei,plotci=TRUE,slab=study,data=cdp)
+data(cdp)
+cdp1 <- metaplus(yi, sei, plotci = TRUE, slab = study, cores = 1, data = cdp)
 summary(cdp1)
 }
 \keyword{method}

@@ -1,8 +1,8 @@
 Package: metaplus
 Type: Package
 Title: Robust Meta-Analysis and Meta-Regression
-Version: 0.7-11
-Date: 2018-03-31
+Version: 1.0-1
+Date: 2021-05-29
 Authors@R: c(person("Ken","Beath",email="ken.beath@mq.edu.au", role=c("aut","cre")),
   person("Ben","Bolker",email="bolker@mcmaster.ca",role="aut"),
   person("R Development Core Team",role="aut"))
@@ -16,10 +16,11 @@ Depends: R(>= 3.2.0)
 Suggests: R.rsp
 VignetteBuilder: R.rsp
 Imports: bbmle, metafor, boot, methods, numDeriv, MASS, graphics,
-        stats, fastGHQuad, lme4
+        stats, fastGHQuad, lme4, Rfast, parallel, doParallel, foreach,
+        doRNG
 LazyData: yes
 License: GPL (>= 2)
 NeedsCompilation: no
-Packaged: 2018-04-01 03:21:43 UTC; kjbeath1
+Packaged: 2021-05-30 02:31:38 UTC; kjbeath1
 Repository: CRAN
-Date/Publication: 2018-04-01 04:01:48 UTC
+Date/Publication: 2021-05-30 04:20:02 UTC

@@ -48,18 +48,12 @@ setMethod("profile", "mymle",
                 names(fix) <- p.i
                 if (is.null(call$fixed)) call$fixed <- fix
                 else call$fixed <- c(eval(call$fixed),fix)
-                #browser()
-                #print(as.vector(call$start))
                 if (skiperrs) {
                     pfit <- try(eval.parent(call, 2L), silent=TRUE)
                 } else {
                     pfit <- eval.parent(call, 2L)
                 }
                 ok <- ! inherits(pfit,"try-error")
-                #print(pfit)
-                #browser()
-                #print(pfit@details$convergence)
-                #print(pfit@details$message)
                 if (debug && ok) cat(coef(pfit),-logLik(pfit),"\n")
                 if(skiperrs && !ok) {
                     warning(paste("Error encountered in profile:",pfit))
@@ -106,11 +100,9 @@ setMethod("profile", "mymle",
             ## Profile the likelihood around its maximum
             ## Based on profile.glm in MASS
             summ <- summary(fitted)
-            #browser()
             if (missing(std.err)) {
                 std.err <- summ@coef[, "Std. Error"]
             } else {
-                #browser()
                 n <- dim(summ@coef)[1]
                 if (length(std.err)!=n) stop("length standard errors not equal to coefficients length")
 # not certain what this was supposed to do - better to stop
@@ -152,8 +144,6 @@ setMethod("profile", "mymle",
             }
             if (!missing(prof.lower)) prof.lower <- xf(prof.lower)
             if (!missing(prof.upper)) prof.upper <- xf(prof.upper)
-            ## cat("upper\n")
-            ## print(upper)
             stop_msg <- list()
             for (i in which) {
               zi <- 0
