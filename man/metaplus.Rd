@@ -40,10 +40,10 @@ Should model only be fitted? If justfit = TRUE then profiling and likelihood rat
 Vector of character strings corresponding to each study.
 }
  \item{useAGQ}{
-Use adaptive Gauss-Hermite quadrature when performing integration for t-distribution random-effects. Useful when standard errors for studies are relatively small.
+Deprecated. No longer used.
 }
  \item{quadpoints}{
-Number of quadrature points to use in adaptive Gauss-Hermite quadrature.
+Deprecated. No longer used.
 }
  \item{notrials}{
 Number of random starting values to use for mixture models.

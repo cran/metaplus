@@ -5,9 +5,9 @@ profilet.metaplus <-
            justfit = FALSE,
            plotci = FALSE,
            slab = NULL,
-           useAGQ = FALSE,
            quadpoints = 21) {
     ghrule <- gaussHermiteData(quadpoints)
+    #ghrule <- gaussHermiteData(41)
     
     isreg <- !is.null(mods)
     
@@ -38,17 +38,17 @@ profilet.metaplus <-
                  tau2,
                  vinv,
                  xcoef) {
-          if ((tau2 == 0.0) | (vinv < 0.0))
+            if ((tau2 == 0.0) | (vinv < 0.0))
             onell <- rep(-Inf, length(nu))
           else {
             if (isreg)
               onell <-
-                -(as.vector(oney - muhat - matrix(onemods, nrow = 1) %*% xcoef) - nu) ^ 2 / (2 * onesigma2) -
-                log(sqrt(tau2)) + dt(nu / sqrt(tau2), df = 1.0 / vinv, log = TRUE)
-            else
+                dnorm(nu,mean=oney-muhat-matrix(onemods, nrow = 1) %*% xcoef,sd=sqrt(onesigma2), log=TRUE) -
+                0.5*log(tau2) + dt(nu / sqrt(tau2), df = 1.0 / vinv, log = TRUE)
+            else 
               onell <-
-                -(oney - muhat - nu) ^ 2 / (2 * onesigma2) - log(sqrt(tau2)) + dt(nu /
-                                                                                    sqrt(tau2), df = 1.0 / vinv, log = TRUE)
+                dnorm(nu,mean=oney-muhat,sd=sqrt(onesigma2), log=TRUE) - 0.5*log(tau2) +
+                dt(nu / sqrt(tau2), df = 1.0 / vinv, log = TRUE)
           }
           return(-onell)
         }
@@ -73,119 +73,56 @@ profilet.metaplus <-
           onemods <- x[3:length(x)]
         else
           onemods <- NULL
-        if (useAGQ) {
-          # find mode about which to perform integration
-          themode <- tryCatch({
-            if (isreg)
-              optim(
-                muhat,
-                logf,
-                oney = oney,
-                onesigma2 = onesigma2,
-                onemods = onemods,
-                muhat = muhat,
-                tau2 = tau2,
-                vinv = vinv,
-                xcoef = xcoef,
-                method = "BFGS",
-                hessian = TRUE
-              )
-            else
-              optim(
-                muhat,
-                logf,
-                oney = oney,
-                onesigma2 = onesigma2,
-                onemods = NULL,
-                muhat = muhat,
-                tau2 = tau2,
-                vinv = vinv,
-                method = "BFGS",
-                hessian = TRUE
-              )
-          },
-          error = function(e) {
-            return(NA)
-          })
-          theint <- tryCatch({
-            if (isreg)
-              aghQuad(
-                f,
-                themode$par,
-                sqrt(1 / themode$hessian),
-                ghrule,
-                oney = oney,
-                onesigma2 = onesigma2,
-                onemods = onemods,
-                muhat = muhat,
-                tau2 = tau2,
-                vinv = vinv,
-                xcoef = xcoef
-              )
-            else
-              aghQuad(
-                f,
-                themode$par,
-                sqrt(1 / themode$hessian),
-                ghrule,
-                oney = oney,
-                onesigma2 = onesigma2,
-                onemods = NULL,
-                muhat = muhat,
-                tau2 = tau2,
-                vinv = vinv
-              )
-          },
-          error = function(e) {
-            return(NA)
-          })
-        } else {
-          theint <- tryCatch({
-            if (isreg)
-              integrate(
-                f,
-                -Inf,
-                Inf,
-                oney = oney,
-                onesigma2 = onesigma2,
-                onemods = onemods,
-                muhat = muhat,
-                tau2 = tau2,
-                vinv = vinv,
-                xcoef = xcoef,
-                subdivisions = 300L,
-                rel.tol = 1.0e-9
-              )$value
-            else
-              integrate(
-                f,
-                -Inf,
-                Inf,
-                oney = oney,
-                onesigma2 = onesigma2,
-                onemods = NULL,
-                muhat = muhat,
-                tau2 = tau2,
-                vinv = vinv,
-                subdivisions = 300L,
-                rel.tol = 1.0e-9
-              )$value
-          },
-          error = function(e) {
-            return(NA)
-          })
-        }
-        
-        theint <- theint * (2 * pi * onesigma2) ^ (-0.5)
-        ll <- log(theint)
+              theint <- tryCatch({
+              if (isreg)
+                integrate(
+                  f,
+                  oney-muhat-12*sqrt(onesigma2),
+                  oney-muhat+12*sqrt(onesigma2),
+                  # -Inf,
+                  # Inf,
+                  oney = oney,
+                  onesigma2 = onesigma2,
+                  onemods = onemods,
+                  muhat = muhat,
+                  tau2 = tau2,
+                  vinv = vinv,
+                  xcoef = xcoef,
+                  subdivisions = 300L,
+                  abs.tol = 0
+                )
+              else
+                integrate(
+                  f,
+                  oney-muhat-12*sqrt(onesigma2),
+                  oney-muhat+12*sqrt(onesigma2),
+                  # -Inf,
+                  # Inf,
+                  oney = oney,
+                  onesigma2 = onesigma2,
+                  onemods = NULL,
+                  muhat = muhat,
+                  tau2 = tau2,
+                  vinv = vinv,
+                  subdivisions = 300L,
+                  abs.tol = 0
+                )
+            },
+            error = function(e) {
+              #print(e)
+              return(NULL)
+            })
+        if (is.null(theint)) ll <- NA
+        else ll <- log(theint$value)
         return(ll)
       }
-      if ((vinv == 0.0) | (tau2 == 0.0)) {
+      
+
+        if ((vinv == 0.0) | (tau2 == 0.0)) {
         w <- 1.0 / (tau2 + sei ^ 2)
         if (isreg)
           negll <-
-            0.5 * sum(log(2 * pi) + log(1 / w) + w * (yi - muhat - as.vector(mods %*% xcoef)) ^
-                        2)
+            0.5 * sum(log(2 * pi) + log(1 / w) + w * (yi - muhat - as.vector(mods %*% xcoef))^2)
         else
           negll <- 0.5 * sum(log(2 * pi) + log(1 / w) + w * (yi - muhat) ^ 2)
       }
@@ -195,6 +132,7 @@ profilet.metaplus <-
         else
           negll <- -sum(apply(cbind(yi, sei ^ 2), 1, calconell))
       }
+      
       if (is.nan(negll))
         negll <- NA
       if (!is.finite(negll))
@@ -204,6 +142,7 @@ profilet.metaplus <-
     }
     
     # obtain starting values
+    # browser()
     if (isreg) {
       start.meta <-
         rma(
@@ -213,13 +152,13 @@ profilet.metaplus <-
           method = "DL"
         )
       start.val <-
-        c(start.meta$b[1, 1], start.meta$tau2, 0.5, start.meta$b[2:dim(start.meta$b)[1], 1])
+        c(start.meta$b[1, 1], start.meta$tau2, 0.1, start.meta$b[2:dim(start.meta$b)[1], 1])
       lower.val <- c(-Inf, 0.0, 0.0, rep(-Inf, dim(mods)[2]))
     } else {
       start.meta <- rma(yi = yi,
                         sei = sei,
                         method = "DL")
-      start.val <- c(start.meta$b[1, 1], start.meta$tau2, 0.5)
+      start.val <- c(start.meta$b[1, 1], start.meta$tau2, 0.1)
       lower.val <- c(-Inf, 0.0, 0.0)
     }
     thenames <- c("muhat", "tau2", "vinv")
@@ -272,8 +211,9 @@ profilet.metaplus <-
       )
     
     maxll <- logLik(maxfit)
-    for (vinv in c(0.01, 0.05, 0.1, 0.2, 0.5, 1)) {
-      start.val[3] <- vinv
+#    for (vinv in c(0.01, 0.05, 0.1, 0.2, 0.5, 1)) {
+    for (vinv in c(0.1)) {
+        start.val[3] <- vinv
       if (isreg)
         profilet.fit <-
           mymle(

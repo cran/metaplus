@@ -1,3 +1,11 @@
+Changes in metaplus version 1.0-2
+
+  o improved use of integrate() function to avoid problems with t-distribution
+
+  o removed option for adaptive gauss-hermite as no longer necessary, and slower
+
+  o no longer use multiple starting values for vinv, as not necessary
+  
 Changes in metaplus version 1.0-1
 
   o when performing bootstrap for testing for outliers in mixture model, don't use random starting values, just use suitable values based on the values from the null model
