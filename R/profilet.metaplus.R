@@ -327,7 +327,7 @@ profilet.metaplus <-
         #profilet.profiled <- profilet.profile(profilet.fit,which=whichp,std.err=myse,del=0.5)
         profilet.profiled <-
           profilet.profile(profilet.fit, which = whichp, std.err = myse)
-        if (class(profilet.profiled) == "profile.mymle")
+        if (inherits(profilet.profiled,"profile.mymle"))
           notprofiled <- FALSE
         else {
           thenames <- c("muhat", "tau2", "vinv")

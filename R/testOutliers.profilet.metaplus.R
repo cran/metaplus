@@ -34,7 +34,9 @@ testOutliers.profilet.metaplus <- function(object,R=999, cores) {
 
   if (object$justfit) stop("Cannot use with objects fitted with justfit=TRUE")
   
-  meta.ml <- rma(yi=object$yi, sei=object$sei, mods=object$mods, method="ML")
+  
+  if (is.null(object$mods))  meta.ml <- rma(yi=object$yi, sei=object$sei, method="ML")
+  else meta.ml <- rma(yi=object$yi, sei=object$sei, mods=object$mods, method="ML")
 
   if (cores>1) {
     if(.Platform$OS.type=="unix") parallel <- "multicore"

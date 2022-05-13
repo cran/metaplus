@@ -24,10 +24,10 @@ Ken Beath <ken.beath@mq.edu.au>
 }
 \examples{
 \donttest{
-data(cdp)
-cdp.mix <- metaplus(yi, sei, plotci = TRUE, slab = study, random = "mixture", cores = 1, data = cdp)
-cdp.mix.outlierProbs <- outlierProbs(cdp.mix)
-plot(cdp.mix.outlierProbs)
+data(mag)
+mag.mix <- metaplus(yi, sei, plotci = TRUE, slab = study, random = "mixture", cores = 1, data = mag)
+mag.mix.outlierProbs <- outlierProbs(mag.mix)
+plot(mag.mix.outlierProbs)
 }
 }
 \keyword{method}

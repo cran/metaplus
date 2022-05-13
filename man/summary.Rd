@@ -22,8 +22,8 @@ Additional parameters to summary.}
 Ken Beath <ken.beath@mq.edu.au>
 }
 \examples{
-data(cdp)
-cdp1 <- metaplus(yi, sei, plotci = TRUE, slab = study, cores = 1, data = cdp)
-summary(cdp1)
+data(mag)
+mag1 <- metaplus(yi, sei, plotci = TRUE, slab = study, cores = 1, data = mag)
+summary(mag1)
 }
 \keyword{method}

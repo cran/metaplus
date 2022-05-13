@@ -26,7 +26,7 @@ On some systems the alignment of characters in the CI may be poor when saving th
 An alternative is to use pdf.options() with the same parameters before the plot, and pdf.options(reset = TRUE) will produce the same effect.
 }
 \author{
-Ken Beath <ken.beath@mq.edu.au>
+Ken Beath <ken@kjbeath.com.au>
 }
 \examples{
 \donttest{

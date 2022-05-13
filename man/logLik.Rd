@@ -15,4 +15,9 @@ Returns the log Likelihood for a metaplus object.
 The loglikelihood of the fitted model.
 }
 \author{Ken Beath}
+\examples{
+data(mag)
+mag1 <- metaplus(yi, sei, plotci = TRUE, slab = study, cores = 1, data = mag)
+print(logLik(mag1))
+}
 \keyword{methods}

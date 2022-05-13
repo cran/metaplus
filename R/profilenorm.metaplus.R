@@ -69,7 +69,7 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
       if (isreg) whichp <- c(1,3:(2+dim(mods)[2]))
       else whichp <- 1
       profilenorm.profiled <- profile(profilenorm.fit,which=whichp,std.err=myse)
-      if (class(profilenorm.profiled) == "profile.mymle") notprofiled <- FALSE
+      if (inherits(profilenorm.profiled,"profile.mymle")) notprofiled <- FALSE
       else {
         thenames <- c("muhat","tau2")
         start.val <- profilenorm.profiled@fullcoef

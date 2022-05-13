@@ -180,7 +180,7 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
       myse[is.na(myse)] <- 1.0e-6
       profilemix.stderr <- myse
       profilemix.profiled <- profilemix.profile(profilemix.fit,which=whichp,std.err=profilemix.stderr, notrials=notrials, cores=cores)
-      if (class(profilemix.profiled) == "profile.mymle") notprofiled <- FALSE
+      if (inherits(profilemix.profiled,"profile.mymle")) notprofiled <- FALSE
       else {
         thenames <- c("muhat","tau2","tau2out","lpoutlier")
         start.val <- profilemix.profiled@fullcoef

@@ -24,6 +24,7 @@ Sterne, J. A. C., Bradburn, M. J., & Egger, M. (2001). Meta-analysis in Stata. I
 \donttest{
 data(mag)
 mag1 <- metaplus(yi, sei, plotci = TRUE, slab = study, cores = 1, data = mag)
+plot(mag1)
 }
 }
 \keyword{datasets}

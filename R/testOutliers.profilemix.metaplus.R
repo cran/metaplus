@@ -32,7 +32,8 @@ testOutliers.profilemix.metaplus <- function(object,R=999,cores) {
     return(data)
   }
   
-  meta.ml <- rma(yi=object$yi, sei=object$sei, mods=object$mods, method="ML")
+  if (!is.null(object$mods)) meta.ml <- rma(yi=object$yi, sei=object$sei, mods=object$mods, method="ML")
+  else meta.ml <- rma(yi=object$yi, sei=object$sei, method="ML")
 
   if (cores>1) {
     if(.Platform$OS.type=="unix") parallel <- "multicore"

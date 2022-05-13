@@ -1,3 +1,15 @@
+Changes in metaplus version 1.0-4
+
+  o removed donttest from some examples
+
+Changes in metaplus version 1.0-3
+
+  o fixed crash due to changes in rma procedure requiring missing rather than NULL
+
+  o used inherits rather than class for checking class
+
+  o updated e-mail address
+
 Changes in metaplus version 1.0-2
 
   o improved use of integrate() function to avoid problems with t-distribution
