@@ -11,7 +11,7 @@ Allows fitting of random effects meta-analysis producing confidence intervals ba
 This is the main function that allows fitting the models. The metaplus objects may be plotted, using plot, and tested for outliers using testOutliers. The results of tests.outliers may also be plotted.
 }
 \author{
-Ken Beath <ken.beath@mq.edu.au>
+Ken Beath <ken@kjbeath.id.au>
 }
 \references{
 Baker, R., & Jackson, D. (2008). A new approach to outliers in meta-analysis. Health Care Management Science, 11(2), 121-131. doi:10.1007/s10729-007-9041-8

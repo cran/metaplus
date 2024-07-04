@@ -87,7 +87,7 @@ Jackson, D., Bowden, J., & Baker, R. (2010). How does the DerSimonian and Laird 
 Lee, K. J., & Thompson, S. G. (2008). Flexible parametric models for random effects distributions. Statistics in Medicine, 27, 418-434. doi:10.1002/sim
 }
 \author{
-Ken Beath <ken.beath@mq.edu.au>
+Ken Beath <ken@kjbeath.id.au>
 }
 \note{I have used cores = 1 in the examples, as this is required by some of the checking procedures but it can, and should be, be removed for your own use for faster execution.}
 \examples{

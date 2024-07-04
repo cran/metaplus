@@ -521,7 +521,7 @@ calc_mle2_function <- function(formula,
       vpos <- list()
       pnames0 <- parnames
       names(parnames) <- parnames
-      for (i in seq(along=parameters)) {
+      for (i in seq(along.with=parameters)) {
         vname <- vars[i]      ## name of variable
         p <- parameters[[i]]  ## formula for variable
         p[[2]] <- NULL
@@ -562,7 +562,7 @@ calc_mle2_function <- function(formula,
     ## need to look for parameters etc.
     pars <- unlist(as.list(match.call())[-1])
     if (!is.null(parameters)) {
-      for (.i in seq(along=parameters)) {
+      for (.i in seq(along.with=parameters)) {
         assign(vars[.i],mmats[[.i]] %*% pars[vpos[[.i]]])
       }
     }

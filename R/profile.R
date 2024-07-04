@@ -319,7 +319,7 @@ setMethod("profile", "mymle",
 #     if (missing(main)) 
 #       main <- paste("Likelihood profile:",nm)
 #     main <- rep(main,length=length(nm))
-#     for (i in seq(along = nm)[which]) {
+#     for (i in seq(along.with = nm)[which]) {
 #         ## <FIXME> This does not need to be monotonic
 #         ## cat("**",i,obj[[i]]$par.vals[,i],obj[[i]]$z,"\n")
 #         ## FIXME: reconcile this with confint!

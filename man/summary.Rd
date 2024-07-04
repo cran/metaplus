@@ -19,7 +19,7 @@ Additional parameters to summary.}
 \item{fitstats}{List containing logLikelihood, AIC and BIC}
 }
 \author{
-Ken Beath <ken.beath@mq.edu.au>
+Ken Beath <ken@kjbeath.id.au>
 }
 \examples{
 data(mag)

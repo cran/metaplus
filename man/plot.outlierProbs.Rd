@@ -20,7 +20,7 @@ additional parameters to plot}
 Plot
 }
 \author{
-Ken Beath <ken.beath@mq.edu.au>
+Ken Beath <ken@kjbeath.id.au>
 }
 \examples{
 \donttest{

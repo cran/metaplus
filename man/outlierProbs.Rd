@@ -21,7 +21,7 @@ A metaplus object with a mixture (robust) random effects distribution.
 The outlier probabilities are obtained as the posterior probabilities of each study being an outlier based on the fitted mixture model.
 }
 \author{
-Ken Beath <ken.beath@mq.edu.au>
+Ken Beath <ken@kjbeath.id.au>
 }
 \examples{
 \donttest{

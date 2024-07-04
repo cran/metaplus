@@ -44,6 +44,9 @@ S3method(testOutliers, metaplus)
 S3method(outlierProbs, metaplus)
 S3method(print, summary.metaplus)
 
+S3method(testOutliers, profilemix.metaplus)
+S3method(testOutliers, profilet.metaplus)
+
 S3method(summary, testOutliers)
 S3method(print, summary.testOutliers)
 

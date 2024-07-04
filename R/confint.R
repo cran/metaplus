@@ -51,7 +51,7 @@ function (object, parm, level = 0.95, method,
   ## changed coef() calls to object@coef -- really *don't* want fullcoef!
   Pnames <- names(object@coef)
   if (missing(parm))
-    parm <- seq(along=Pnames)
+    parm <- seq(along.with=Pnames)
   if (is.character(parm)) parm <- match(parm,Pnames)
   if (any(is.na(parm))) stop("parameters not found in model coefficients")
   if (method=="spline") {
@@ -71,7 +71,7 @@ function (object, parm, level = 0.95, method,
     B0 <- object@coef
     pnames <- names(B0)
     if (missing(parm))
-      parm <- seq(along=pnames)
+      parm <- seq(along.with=pnames)
     if (is.character(parm))
       parm <- match(parm, pnames, nomatch = 0)
     a <- (1 - level)/2

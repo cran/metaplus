@@ -1,13 +1,13 @@
 Package: metaplus
 Type: Package
 Title: Robust Meta-Analysis and Meta-Regression
-Version: 1.0-4
-Date: 2022-05-11
-Authors@R: c(person("Ken","Beath",email="ken@kjbeath.com.au", role=c("aut","cre")),
+Version: 1.0-5
+Date: 2024-07-04
+Authors@R: c(person("Ken","Beath",email="ken@kjbeath.id.au", role=c("aut","cre")),
   person("Ben","Bolker",email="bolker@mcmaster.ca",role="aut"),
   person("R Development Core Team",role="aut"))
-Maintainer: Ken Beath <ken@kjbeath.com.au>
-Contact: Ken Beath <ken@kjbeath.com.au>
+Maintainer: Ken Beath <ken@kjbeath.id.au>
+Contact: Ken Beath <ken@kjbeath.id.au>
 Author: Ken Beath [aut, cre],
   Ben Bolker [aut],
   R Development Core Team [aut]
@@ -21,6 +21,6 @@ Imports: bbmle, metafor, boot, methods, numDeriv, MASS, graphics,
 LazyData: yes
 License: GPL (>= 2)
 NeedsCompilation: no
-Packaged: 2022-05-11 09:07:31 UTC; kjbeath1
+Packaged: 2024-07-04 09:23:46 UTC; kenbeath
 Repository: CRAN
-Date/Publication: 2022-05-13 05:40:02 UTC
+Date/Publication: 2024-07-04 13:40:02 UTC

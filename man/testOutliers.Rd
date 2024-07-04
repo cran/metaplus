@@ -29,7 +29,7 @@ Number of cores used to simultaneously perform simulations.
 }
 \note{Running the default number of bootstrap samples may take considerable time, of the order of hours. Use of the parallel options will improve these times. For a preliminary guide to whether there are outliers, this is indicated by a reduction in AIC or BIC with the robust model, and a change in the estimated mean effect.}
 \author{
-Ken Beath <ken.beath@mq.edu.au>
+Ken Beath <ken@kjbeath.id.au>
 }
 \examples{
 \donttest{
