@@ -1,3 +1,7 @@
+Changes in metaplus version 1.0-6
+
+  o I've forced the cores argument to 1 due to slow speed, caused by loading metafor. Will be fixed soon..
+
 Changes in metaplus version 1.0-5
 
   o changed seq() parameter to along.with from along as could result in errors under certain settings

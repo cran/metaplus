@@ -32,8 +32,6 @@ importFrom("doParallel", "registerDoParallel")
 
 importFrom("foreach", "foreach", "%dopar%")
 
-importFrom("doRNG", "%dorng%")
-
 S3method(plot, metaplus)
 S3method(summary, metaplus)
 S3method(print, metaplus)
