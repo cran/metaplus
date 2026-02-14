@@ -24,7 +24,7 @@ Data for the meta-analysis by Marinho et al (2009) to determine the effectivenes
  Marinho et al (2009)
  }
 \references{
-Marinho, V. C. C., Higgins, J. P. T., Logan, S., & Sheiham, A. (2009). Fluoride toothpastes for preventing dental caries in children and adolescents (Review). The Cochrane Database of Systematic Reviews. Retrieved from http://onlinelibrary.wiley.com/doi/10.1002/14651858.CD002278/pdf
+Marinho, V. C. C., Higgins, J. P. T., Logan, S., & Sheiham, A. (2009). Fluoride toothpastes for preventing dental caries in children and adolescents (Review). The Cochrane Database of Systematic Reviews. Retrieved from https://onlinelibrary.wiley.com/doi/10.1002/14651858.CD002278/pdf
 }
 \examples{
 \donttest{

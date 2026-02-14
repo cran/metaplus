@@ -1,3 +1,13 @@
+Changes in metaplus version 1.0-8
+
+  o Improve use of multiple cores
+
+  o Fix problems with vignettes failing CRAN check
+
+Changes in metaplus version 1.0-7
+
+  o Change default cores to 1 less than logical cores
+
 Changes in metaplus version 1.0-6
 
   o I've forced the cores argument to 1 due to slow speed, caused by loading metafor. Will be fixed soon..

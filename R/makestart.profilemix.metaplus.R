@@ -1,7 +1,5 @@
 makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL,notrials,cores) {
   
-  cores <- 1
-  
   fitonemcore <- function(yi,sei,outlierstarts,mods,fixed) {
  
     fitoneml2reg <- function(yi,sei,outliers,mods=NULL,fixed) {
@@ -11,10 +9,10 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL,notrials,c
       rl2reg <- function(muhat,tau2,tau2out,lpoutlier,xcoef,yi,sei,mods,isreg,prop) {
         poutlier <- exp(lpoutlier)/(1+exp(lpoutlier))
         w <- 1.0/(tau2+sei^2)
-        if (isreg) p1 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
+        if (isreg) p1 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(as.matrix(mods) %*% xcoef))^2)
         else p1 <-  -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)
         w <- 1.0/(tau2out+sei^2)
-        if (isreg) p2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
+        if (isreg) p2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(as.matrix(mods) %*% xcoef))^2)
         else p2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)
         if (!missing(prop)) {
           ll <- prop*cbind(p1,p2)
@@ -42,11 +40,13 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL,notrials,c
       currlpoutlier <- log(poutlier/(1-poutlier))
       currmuhat <- start.meta$muhat
       ncoef <- dim(mods)[2]
+            
       if (isreg) {
         start.meta <- unlist(start.meta)
         currxcoef <- matrix(start.meta[3:(ncoef+2)],ncol=1)
       } else currxcoef <- NULL
-      if (isreg) currtau2out <- sqrt(sum(outliers*(yi-currmuhat-as.vector(mods %*% currxcoef))^2)/sum(outliers))
+ 
+       if (isreg) currtau2out <- sqrt(sum(outliers*(yi-currmuhat-as.vector(as.matrix(mods) %*% currxcoef))^2)/sum(outliers))
       else currtau2out <- sqrt(sum(outliers*(yi-currmuhat)^2)/sum(outliers))
       if (is.nan(currtau2out)) currtau2out <- 3*currtau2
       if (currtau2out==0.0) currtau2out <- 0.2
@@ -72,10 +72,10 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL,notrials,c
         # expectation step
         currpoutlier <- exp(currlpoutlier)/(1+exp(currlpoutlier))
         w <- 1.0/(currtau2+sei^2)
-        if (isreg) ll1 <- -0.5*(log(2*pi)-log(w)+w*(yi-currmuhat-as.vector(mods %*% currxcoef))^2)+log(1-currpoutlier)
+        if (isreg) ll1 <- -0.5*(log(2*pi)-log(w)+w*(yi-currmuhat-as.vector(as.matrix(mods) %*% currxcoef))^2)+log(1-currpoutlier)
         else ll1 <- -0.5*(log(2*pi)-log(w)+w*(yi-currmuhat)^2)+log(1-currpoutlier)
         w <- 1.0/(currtau2out+sei^2)
-        if (isreg) ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-currmuhat-as.vector(mods %*% currxcoef))^2)+log(currpoutlier)
+        if (isreg) ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-currmuhat-as.vector(as.matrix(mods) %*% currxcoef))^2)+log(currpoutlier)
         else ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-currmuhat)^2)+log(currpoutlier)
         
         l <- exp(cbind(ll1,ll2))
@@ -126,100 +126,69 @@ makestart.profilemix.metaplus <- function(yi,sei,mods=NULL,fixed=NULL,notrials,c
         currtau2 <- temp
         currlpoutlier <- -currlpoutlier 
       }
-      return(list(logLik=currll,params=list(muhat=currmuhat,tau2=currtau2,tau2out=currtau2out,lpoutlier=currlpoutlier,
-                                            xcoef=currxcoef),outliers=outliers))
+      return(list(logLik=currll,params=c(currmuhat,currtau2,currtau2out,currlpoutlier,
+                                            currxcoef)))
     }
-    
-    noutliers <- dim(outlierstarts)[1]
-    res <- vector(mode = "list", length = noutliers)
-    for (i in 1:noutliers) res[[i]] <- fitoneml2reg(yi,sei,outlierstarts[i,],mods,fixed)
+    res <- fitoneml2reg(yi,sei,outlierstarts,mods,fixed)
     return(res)
   }
+  
+  thestatistic <- function(data, ...) {
+        
+    nmods <- dim(data)[2]-2
 
+    if (nmods >0) {
+      if (nmods==1) mods <- as.data.frame(cbind(data[, 3:dim(data)[2]]))
+      else mods <- as.data.frame(data[, 3:dim(data)[2]])
+      names(mods) <- names(data)[3:dim(data)[2]]
+    }
+   else mods <- NULL
+    
+    noutliers <- max(1,round(length(data$yi)*0.2))
+    outliers <- matrix(sample(c(rep(1,noutliers),rep(0,length(data$yi)-noutliers)),length(yi)), nrow=1)
+    
+    onestat <- fitonemcore(data$yi,data$sei,outliers,mods,fixed)
+ 
+    return(c(onestat$logLik, onestat$params))
+  }
   isreg <- !is.null(mods)
   
+  bootdata <- data.frame(yi=yi, sei=sei)
+  
+  if (isreg) bootdata <- cbind(bootdata, mods)
+    
   infixed <- fixed
   fixed <- unlist(infixed)
   names(fixed) <- names(infixed)
-  # RNGkind("L'Ecuyer-CMRG")
-  # if (cores>1) {
-  #   if(.Platform$OS.type=="unix") parallel <- "multicore"
-  #   else parallel <- "snow"
-  # } else parallel <- "no"
-  noutliers <- max(1,round(length(yi)*0.2))
-  outlierstarts <- NULL
-  if (notrials > 0) {
-    for (i in 1:notrials) {
-      outliers <- sample(c(rep(1,noutliers),rep(0,length(yi)-noutliers)),length(yi))
-      outlierstarts <- rbind(outlierstarts,outliers)
-    }
-  }
-  
+
   if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) runif(1)
   seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
   
   maxll <- -Inf 
-  
-  if (cores > 1) {
+ 
+    if (cores>1) {
+     if(.Platform$OS.type=="unix")  parallel <- "multicore"
+         else parallel <- "snow" }
+        else parallel <- "no"
+       theboot <- boot(bootdata, thestatistic, R=notrials, sim = "parametric",
+         ran.gen = function(d, p) d,
+         fixed=fixed,
+         parallel = parallel,
+         ncpus = cores)
+    
+    theboot <- theboot$t
+    thefails <- is.na(theboot[,1])
+    nfails <- sum(thefails)
+    if (nfails>0) theboot <- theboot[!thefails,]
+    if (nfails>0) warning(sprintf("Failed to obtain starting values for %i starting sets", nfails))
+    
+    theboot <- theboot[order(theboot[,1], decreasing=TRUE),]
+    theboot <- theboot[1,]
 
-    percore <- rep(notrials %/% cores, cores)
-    percore <- percore+c(rep(1,notrials %% cores),rep(0,cores-notrials %% cores))
-    
-    cumcore <- c(1,cumsum(percore)+1)
-    cumcore <- cumcore[1:(length(cumcore)-1)]
-
-#    res <- vector(mode = "list", length = cores)
-#    for (i in 1:cores) res <- c(res,fitonemcore(yi,sei,outlierstarts[cumcore[i]:(cumcore[i]+percore[i]-1),],mods,fixed))
-    
-#    start.time <- Sys.time()
-    cl <- parallel::makeCluster(cores)
-    doParallel::registerDoParallel(cl)
-    rescore = foreach(i = 1:cores) %dopar% {
-                    fitonemcore(yi,sei,outlierstarts[cumcore[i]:(cumcore[i]+percore[i]-1),],mods,fixed)}
-    
-    # browser()
-    parallel::stopCluster(cl)
-#    stop.time <- Sys.time()
-    
-#    print(stop.time-start.time)
-    
-    res <- list()
-    for (i in 1:cores) res <- c(res,rescore[[i]])
-    
-    # browser()
-    maxll <- -Inf
-    nfails <- 0
-    for (i in 1:notrials) {
-#      if (verbose) cat(c(res[[i]]$logLik,res[[i]]$start.val),"\n")
-      if (is.na(res[[i]]$logLik)) nfails <- nfails+1
-      else {
-        if (res[[i]]$logLik>maxll) {
-          maxll <- res[[i]]$logLik
-          maxfitted <- res[[i]]
-        }
-      }
-    }
-    if (nfails > 0) warning(sprintf("Failed to obtain starting values for %i starting sets", nfails))
-  } else {
-    maxll <- -Inf
-    nfails <- 0
-#    start.time <- Sys.time()
-    
-    thefits <- fitonemcore(yi,sei,outlierstarts,mods,fixed)
-    
-#    stop.time <- Sys.time()
-    
-#    print(stop.time-start.time)
-    for (i in 1:notrials) {
-     if (is.na(thefits[[i]]$logLik)) nfails <- nfails+1
-      else {
-        if (thefits[[i]]$logLik>maxll) {
-          maxll <- thefits[[i]]$logLik
-          maxfitted <- thefits[[i]]
-        }
-      }
-    }
-    if (nfails > 0) warning(sprintf("Failed to obtain starting values for %i starting sets", nfails))
-  }
-  return(maxfitted)
+    if (isreg) res <- list(muhat=theboot[2], tau2=theboot[3], tau2out=theboot[4],
+                    lpoutlier=theboot[5], xcoef=matrix(theboot[6:length(theboot)], ncol=1))
+    else res <- list(muhat=theboot[2], tau2=theboot[3], tau2out=theboot[4],
+                lpoutlier=theboot[5])
+    res <- list(logLik=theboot[1],params=res)
+    res
 }

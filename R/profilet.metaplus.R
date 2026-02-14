@@ -109,7 +109,6 @@ profilet.metaplus <-
                 )
             },
             error = function(e) {
-              #print(e)
               return(NULL)
             })
         if (is.null(theint)) ll <- NA
@@ -142,7 +141,6 @@ profilet.metaplus <-
     }
     
     # obtain starting values
-    # browser()
     if (isreg) {
       start.meta <-
         rma(
@@ -151,21 +149,21 @@ profilet.metaplus <-
           mods = as.data.frame(mods),
           method = "DL"
         )
-      start.val <-
+      start.vals <-
         c(start.meta$b[1, 1], start.meta$tau2, 0.1, start.meta$b[2:dim(start.meta$b)[1], 1])
       lower.val <- c(-Inf, 0.0, 0.0, rep(-Inf, dim(mods)[2]))
     } else {
       start.meta <- rma(yi = yi,
                         sei = sei,
                         method = "DL")
-      start.val <- c(start.meta$b[1, 1], start.meta$tau2, 0.1)
+      start.vals <- c(start.meta$b[1, 1], start.meta$tau2, 0.1)
       lower.val <- c(-Inf, 0.0, 0.0)
     }
     thenames <- c("muhat", "tau2", "vinv")
     if (isreg)
       thenames <- c(thenames, dimnames(mods)[[2]])
     parnames(ll.profilet) <- thenames
-    names(start.val) <- thenames
+    names(start.vals) <- thenames
     names(lower.val) <- thenames
     
     # vinv=0.0 is a special case for some reason, maybe problem in optimisation
@@ -213,12 +211,12 @@ profilet.metaplus <-
     maxll <- logLik(maxfit)
 #    for (vinv in c(0.01, 0.05, 0.1, 0.2, 0.5, 1)) {
     for (vinv in c(0.1)) {
-        start.val[3] <- vinv
+        start.vals[3] <- vinv
       if (isreg)
         profilet.fit <-
           mymle(
             ll.profilet,
-            start = start.val,
+            start = start.vals,
             vecpar = TRUE,
             data = list(yi = yi, sei =
                           sei, mods = mods),
@@ -231,7 +229,7 @@ profilet.metaplus <-
         profilet.fit <-
           mymle(
             ll.profilet,
-            start = start.val,
+            start = start.vals,
             vecpar = TRUE,
             data = list(yi = yi, sei =
                           sei),
@@ -247,7 +245,7 @@ profilet.metaplus <-
     }
     profilet.fit <- maxfit
     # also tau2 and vinv are zero as not identifiable
-    newstart.val <- start.val
+    newstart.val <- start.vals
     newstart.val[2:3] <- 0.0
     newlower.val <- lower.val
     newlower.val[2:3] <- 0.0
@@ -331,7 +329,7 @@ profilet.metaplus <-
           notprofiled <- FALSE
         else {
           thenames <- c("muhat", "tau2", "vinv")
-          start.val <- profilet.profiled@fullcoef
+          start.vals <- profilet.profiled@fullcoef
           if (isreg) {
             lower.val <- c(-Inf, 0.0, 0.0, rep(-Inf, dim(mods)[2]))
             thenames <- c(thenames, dimnames(mods)[[2]])
@@ -339,13 +337,13 @@ profilet.metaplus <-
             lower.val <- c(-Inf, 0.0, 0.0)
           }
           parnames(ll.profilet) <- thenames
-          names(start.val) <- thenames
+          names(start.vals) <- thenames
           names(lower.val) <- thenames
           if (isreg)
             profilet.fit <-
             mymle(
               ll.profilet,
-              start = start.val,
+              start = start.vals,
               vecpar = TRUE,
               data = list(
                 yi = yi,
@@ -361,7 +359,7 @@ profilet.metaplus <-
             profilet.fit <-
             mymle(
               ll.profilet,
-              start = start.val,
+              start = start.vals,
               vecpar = TRUE,
               data = list(yi = yi, sei = sei),
               skip.hessian = TRUE,
@@ -392,13 +390,13 @@ profilet.metaplus <-
       theci <- matrix(rep(NA, length(profilet.fit@coef) * 2), ncol = 2)
       theci[whichp, ] <- profilet.ci
       results <- cbind(results, theci)
-      pvalues <- rep(NA, length(start.val))
+      pvalues <- rep(NA, length(start.vals))
       for (iparm in whichp) {
         newstart.val <- coef(profilet.fit)
         newstart.val[iparm] <- 0.0
         newlower.val <- lower.val
         newlower.val[iparm] <- 0.0
-        fixedparm <- names(start.val)[iparm]
+        fixedparm <- names(start.vals)[iparm]
         if (isreg)
           doprofile <-
           paste(

@@ -26,11 +26,7 @@ importFrom(lme4,Nelder_Mead)
 
 importFrom(Rfast, rowMaxs)
 
-importFrom("parallel", "detectCores","makeCluster","stopCluster")
-
-importFrom("doParallel", "registerDoParallel")
-
-importFrom("foreach", "foreach", "%dopar%")
+importFrom("parallel", "detectCores")
 
 S3method(plot, metaplus)
 S3method(summary, metaplus)

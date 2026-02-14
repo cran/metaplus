@@ -8,7 +8,7 @@
 metaplus <- function(yi,sei,mods=NULL,random="normal",
       label=switch(random,"normal"="Random Normal","t-dist"="Random t-distribution", "mixture"="Random mixture"),
       plotci=FALSE,justfit=FALSE,slab=1:length(yi),
-      useAGQ = FALSE,quadpoints=21,notrials=20, cores = max(detectCores() %/% 2, 1), 
+      useAGQ = FALSE,quadpoints=21,notrials=20, cores = max(detectCores(logical = FALSE)-1, 1), 
       data) {
   if (!missing(useAGQ)) warning('useAGQ is deprecated as AGQ is no longer available')
   if (!missing(quadpoints)) warning('quadpoints is deprecated as AGQ is no longer available')
@@ -35,9 +35,12 @@ metaplus <- function(yi,sei,mods=NULL,random="normal",
   sei <- eval(mf.sei, data, enclos = sys.frame(sys.parent()))
   if (!is.null(mf.slab)) slab <- eval(mf.slab, data, enclos = sys.frame(sys.parent()))
   mods <- eval(mf.mods, data, enclos = sys.frame(sys.parent()))
+
   if (!is.null(mods)) {
-    mods <- as.data.frame(mods)
-    if (dim(mods)[2]==1) names(mods) <- deparse(mf.mods)
+    if (is.atomic(mods) && !is.matrix(mods)) mods <- as.data.frame(cbind(mods))
+    else {
+      mods <- as.data.frame(mods)
+    }
   }
   df <- switch(random,
                 "normal"=length(yi)-1,
@@ -47,6 +50,7 @@ metaplus <- function(yi,sei,mods=NULL,random="normal",
   if (df<=1) stop("Insufficient studies to fit model")
   if ((df<=3) & (!justfit)) warning("Very few studies. Solution may be unstable.")
   if (cores>1) loadNamespace("parallel")
+
   fit <- switch(random,
                 "normal"=profilenorm.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab),
                 "t-dist"=profilet.metaplus(yi,sei,mods=mods,justfit=justfit,plotci=plotci,slab=slab,quadpoints=quadpoints),

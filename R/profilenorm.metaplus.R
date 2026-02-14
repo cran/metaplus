@@ -8,7 +8,7 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
     tau2 <- par[2]
     if (isreg) xcoef <- par[3:length(par)]
     w <- 1.0/(tau2+sei^2)
-    if (isreg) negll <- 0.5*sum(log(2*pi)+log(1/w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
+    if (isreg) negll <- 0.5*sum(log(2*pi)+log(1/w)+w*(yi-muhat-as.vector(as.matrix(mods) %*% xcoef))^2)
     else negll <- 0.5*sum(log(2*pi)+log(1/w)+w*(yi-muhat)^2)
     if (is.nan(negll)) negll <- NA
     if (!is.finite(negll)) negll <- NA
@@ -20,29 +20,29 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
   
   if (isreg) {
     start.meta <- rma(yi=yi, sei=sei, mods=as.data.frame(mods), method="DL")
-    start.val <- c(start.meta$b[1,1],start.meta$tau2,start.meta$b[2:dim(start.meta$b)[1],1])
+    start.vals <- c(start.meta$b[1,1],start.meta$tau2,start.meta$b[2:dim(start.meta$b)[1],1])
     lower.val <- c(-Inf,0.0,rep(-Inf,dim(mods)[2]))
   } else {
     start.meta <- rma(yi=yi, sei=sei, method="DL")
-    start.val <- c(start.meta$b[1,1],start.meta$tau2)
+    start.vals <- c(start.meta$b[1,1],start.meta$tau2)
     lower.val <- c(-Inf,0.0)
   }
-  if (isreg) names(start.val) <- c("muhat","tau2",dimnames(mods)[[2]])
-  else names(start.val) <- c("muhat","tau2")
+  if (isreg) names(start.vals) <- c("muhat","tau2",dimnames(mods)[[2]])
+  else names(start.vals) <- c("muhat","tau2")
   
-  parnames(ll.profilenorm) <- names(start.val)
+  parnames(ll.profilenorm) <- names(start.vals)
   
-  names(lower.val) <- names(start.val)
+  names(lower.val) <- names(start.vals)
   
-  start.val <- start.val+0.001
+  start.vals <- start.vals+0.001
   
-  if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
+  if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.vals,vecpar=TRUE,
                                    optimizer="user",optimfun=myoptim,
                                    data=list(yi=yi,sei=sei,mods=as.matrix(mods)),
                                    skip.hessian=TRUE,
   #                                 control=list(eval.max=1000),
                                    lower=lower.val)
-  else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
+  else profilenorm.fit <- mymle(ll.profilenorm,start=start.vals,vecpar=TRUE,
                                 optimizer="user",optimfun=myoptim,
                                 data=list(yi=yi,sei=sei),
                              skip.hessian=TRUE,
@@ -72,7 +72,7 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
       if (inherits(profilenorm.profiled,"profile.mymle")) notprofiled <- FALSE
       else {
         thenames <- c("muhat","tau2")
-        start.val <- profilenorm.profiled@fullcoef
+        start.vals <- profilenorm.profiled@fullcoef
         if (isreg) {
           lower.val <- c(-Inf,0.0,rep(-Inf,dim(mods)[2]))
           thenames <- c(thenames,dimnames(mods)[[2]])
@@ -80,15 +80,15 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
           lower.val <- c(-Inf,0.0)
         }
         parnames(ll.profilenorm) <- thenames
-        names(start.val) <- thenames
+        names(start.vals) <- thenames
         names(lower.val) <- thenames
-        if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
+        if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.vals,vecpar=TRUE,
                                            data=list(yi=yi,sei=sei,mods=mods),
                                            skip.hessian=TRUE,
                                            optimizer="user",optimfun=myoptim,
                                            control=list(eval.max=1000),
                                            lower=lower.val)
-        else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
+        else profilenorm.fit <- mymle(ll.profilenorm,start=start.vals,vecpar=TRUE,
                                      data=list(yi=yi,sei=sei),
                                       skip.hessian=TRUE,
                                      control=list(eval.max=1000),
@@ -112,16 +112,16 @@ profilenorm.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,sla
     results <- cbind(results,theci)
     
     # obtain p value for each coefficient
-    pvalues <- rep(NA,length(start.val))
+    pvalues <- rep(NA,length(start.vals))
     for (iparm in whichp) {
-      fixedparm <- names(start.val)[iparm]
+      fixedparm <- names(start.vals)[iparm]
       if (isreg) dostart <- paste("profilenorm.start <- makestart.profilenorm.metaplus(yi=yi,sei=sei,mods=as.matrix(mods),\n",
                                   "fixed=list(",fixedparm,"=0.0))",sep="")
       else dostart <- paste("profilenorm.start <- makestart.profilenorm.metaplus(yi=yi,sei=sei,\n",
                             "fixed=list(",fixedparm,"=0.0))",sep="")
       eval(parse(text=dostart))
       newstart.val <-  unlist(profilenorm.start)
-      newstart.val <- newstart.val[names(start.val)]
+      newstart.val <- newstart.val[names(start.vals)]
 #      newstart.val <-  newstart.val[-iparm]
 #      newlower.val <- lower.val[-iparm]
 		newlower.val <- lower.val

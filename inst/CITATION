@@ -9,9 +9,9 @@ bibentry(
 	number = 1,
 	pages = "5--16",
 	year = 2016,
-	url = "https://journal.r-project.org/archive/2016-1/beath.pdf",
+	url = "https://journal.r-project.org/articles/RJ-2016-001/RJ-2016-001.pdf",
 	textVersion = paste("Beath, K. J. (2016).",
                        "metaplus: An R Package for the Analysis of Robust Meta-Analysis and Meta-Regression,",
                        "R Journal, 8(1), 5-16.",
-                       "URL: https://journal.r-project.org/archive/2016-1/beath.pdf")
+                       "URL: https://https://journal.r-project.org/articles/RJ-2016-001/RJ-2016-001.pdf")
 )

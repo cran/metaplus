@@ -12,7 +12,7 @@ metaplus(yi, sei, mods = NULL, random = "normal",
  "mixture" = "Random mixture"), 
  plotci = FALSE, justfit = FALSE, slab = 1:length(yi), 
  useAGQ = FALSE, quadpoints = 21, notrials = 20, 
- cores = max(detectCores()\%/\%2, 1), data)
+ cores = max(detectCores(logical = FALSE)-1, 1), data)
 }
 \arguments{
  \item{yi}{

@@ -3,7 +3,7 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
   isreg <- !is.null(mods)
   
   if (isreg) mods <- as.matrix(mods)
-
+  
   rl2reg <- function(muhat,tau2,tau2out,lpoutlier,xcoef,yi,sei,mods,isreg,prop) {
     poutlier <- exp(lpoutlier)/(1+exp(lpoutlier))
     w <- 1.0/(tau2+sei^2)
@@ -52,12 +52,13 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
     return(negll)
   }      
   
+  #browser()
   # obtain starting values
   if (is.null(start.vals)) {
     if (isreg) {
       start.meta <- makestart.profilemix.metaplus(yi=yi,sei=sei, mods=mods,notrials=notrials,cores=cores)$params
-      start.val <- c(start.meta$muhat,start.meta$tau2,start.meta$tau2out,start.meta$lpoutlier,start.meta$xcoef)
-      lower.val <- c(-Inf,0.0,0.0,-Inf,rep(-Inf,dim(mods)[2]))
+      start.val <- unlist(start.meta)
+       lower.val <- c(-Inf,0.0,0.0,-Inf,rep(-Inf,dim(mods)[2]))
     } else {
       start.meta <- makestart.profilemix.metaplus(yi=yi,sei=sei,notrials=notrials,cores=cores)$params
       start.val <- c(start.meta$muhat,start.meta$tau2,start.meta$tau2out,start.meta$lpoutlier)
@@ -77,12 +78,12 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
       currtau2 <- start.vals[2]
       currtau2out <- start.vals[3]
       currlpoutlier <- start.vals[4]
-       lower.val <- c(-Inf,0.0,0.0,-Inf)
+      lower.val <- c(-Inf,0.0,0.0,-Inf)
     }
     # perform EM
     nem <- 0
     currll <- -Inf
-     repeat {
+    repeat {
       nem <- nem+1
       # expectation step
       currpoutlier <- exp(currlpoutlier)/(1+exp(currlpoutlier))
@@ -133,26 +134,28 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
       if (abs((lastll-currll)/currll)<1.0e-4) break()
       if (nem >1000) break()
     }
+
     if (isreg) {
       start.val <- c(currmuhat,currtau2,currtau2out,currlpoutlier,currxcoef)
     } else {
       start.val <- c(currmuhat,currtau2,currtau2out,currlpoutlier)
-     }
+    }
   }
+  
   if (isreg) {
-    names(start.val) <- c("muhat","tau2","tau2out","currlpoutlier",dimnames(mods)[[2]])
+    names(start.val) <- c("muhat","tau2","tau2out","lpoutlier",dimnames(mods)[[2]])
   } else {
-     names(start.val) <- c("muhat","tau2","tau2out","currlpoutlier")
+    names(start.val) <- c("muhat","tau2","tau2out","lpoutlier")
   }
   names(lower.val) <- names(start.val)
   parnames(ll.profilemix) <- names(start.val)
   if (isreg)  profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,
                                       optimizer="user",optimfun=myoptim,
                                       skip.hessian=TRUE,
-                                     data=list(yi=yi,sei=sei,mods=mods),
-                                     lower=lower.val)
-    else profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,
-    							optimizer="user",optimfun=myoptim,
+                                      data=list(yi=yi,sei=sei,mods=mods),
+                                      lower=lower.val)
+  else profilemix.fit <- mymle(ll.profilemix,start=start.val,vecpar=TRUE,
+                               optimizer="user",optimfun=myoptim,
                                skip.hessian=TRUE,
                                data=list(yi=yi,sei=sei),
                                lower=lower.val)
@@ -208,10 +211,10 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
         results <- profilemix.fit@coef
       }
     }
-
+    
     if (any(order(profilemix.profiled@profile$muhat$z)!=(1:length(profilemix.profiled@profile$muhat$z)))) 
       warning("Profile loglikelihood is not unimodal in region of estimate. Possibly incorrect confidence intervals.")
-
+    
     profilemix.ci <- confint(profilemix.profiled,method="uniroot")
     
     if (plotci) {
@@ -234,8 +237,9 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
       else dostart <- paste("newstart.meta <- makestart.profilemix.metaplus(yi,sei, NULL,",
                             "fixed=list(",fixedparm,"=0.0),notrials=notrials,cores=cores)$params","\n",sep="")
       eval(parse(text=dostart))
-      if (isreg) newstart.val <- c(newstart.meta$muhat,newstart.meta$tau2,newstart.meta$tau2out,newstart.meta$lpoutlier,newstart.meta$xcoef)
+       if (isreg) newstart.val <- c(newstart.meta$muhat,newstart.meta$tau2,newstart.meta$tau2out,newstart.meta$lpoutlier,newstart.meta$xcoef)
       else newstart.val <- c(newstart.meta$muhat,newstart.meta$tau2,newstart.meta$tau2out,newstart.meta$lpoutlier)
+      
       names(newstart.val) <- names(start.val)
       #      newstart.val <- newstart.val[-iparm]
       newlower.val <- lower.val
@@ -256,7 +260,7 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
     dimnames(results)[[1]][4] <- "Outlier prob."
     results[4,1] <- 1.0/(1+exp(-results[4,1]))
   }
-
+  
   # calculate final posterior probabilities
   muhat <- profilemix.fit@coef[1]
   tau2 <- profilemix.fit@coef[2]
@@ -272,7 +276,7 @@ profilemix.metaplus <- function(yi,sei,mods=NULL,justfit=FALSE,plotci=FALSE,slab
   w <- 1.0/(tau2out+sei^2)
   if (isreg) ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat-as.vector(mods %*% xcoef))^2)
   else ll2 <- -0.5*(log(2*pi)-log(w)+w*(yi-muhat)^2)
-
+  
   ll <- cbind(ll1+log(1-poutlier),ll2+log(poutlier))
   lmax <- exp(ll-rowMaxs(ll, value=TRUE))
   prop <- lmax/rowSums(lmax)

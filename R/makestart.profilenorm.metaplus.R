@@ -20,38 +20,38 @@ makestart.profilenorm.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
   names(fixed) <- names(infixed)
   
   # obtain starting values
-  
+ 
   if (isreg) {
     start.meta <- rma(yi=yi, sei=sei, mods=as.data.frame(mods), method="DL")
-    start.val <- c(start.meta$b[1,1],start.meta$tau2,start.meta$b[2:dim(start.meta$b)[1],1])
+    start.vals <- c(start.meta$b[1,1],start.meta$tau2,start.meta$b[2:dim(start.meta$b)[1],1])
     lower.val <- c(-Inf,0.0,rep(-Inf,dim(mods)[2]))
   } else {
     start.meta <- rma(yi=yi, sei=sei, method="DL")
-     start.val <- c(start.meta$b[1,1],start.meta$tau2)
+     start.vals <- c(start.meta$b[1,1],start.meta$tau2)
     lower.val <- c(-Inf,0.0)
   }
-  if (isreg) names(start.val) <- c("muhat","tau2",dimnames(mods)[[2]])
-  else names(start.val) <- c("muhat","tau2")
+  if (isreg) names(start.vals) <- c("muhat","tau2",dimnames(mods)[[2]])
+  else names(start.vals) <- c("muhat","tau2")
 
-  parnames(ll.profilenorm) <- names(start.val)
+  parnames(ll.profilenorm) <- names(start.vals)
   
 #  thefixed <- unlist(fixed)
 #  if (length(thefixed)>0) {
-#    fixedparms <- (1:length(start.val))[names(start.val)==names(thefixed)]
-#    start.val <- start.val[-fixedparms]
+#    fixedparms <- (1:length(start.vals))[names(start.vals)==names(thefixed)]
+#    start.vals <- start.vals[-fixedparms]
 #    lower.val <- lower.val[-fixedparms]
 #  }
   
-  names(lower.val) <- names(start.val)
+  names(lower.val) <- names(start.vals)
   
-  start.val <- start.val+0.001
+  start.vals <- start.vals+0.001
   
-  if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
+  if (isreg) profilenorm.fit <- mymle(ll.profilenorm,start=start.vals,vecpar=TRUE,
                                    optimizer="user",optimfun=myoptim,data=list(yi=yi,sei=sei,mods=as.matrix(mods)),
                                    skip.hessian=TRUE,
                                    lower=lower.val,
                                    fixed=fixed)
-  else profilenorm.fit <- mymle(ll.profilenorm,start=start.val,vecpar=TRUE,
+  else profilenorm.fit <- mymle(ll.profilenorm,start=start.vals,vecpar=TRUE,
                             optimizer="user",optimfun=myoptim,data=list(yi=yi,sei=sei),
                              skip.hessian=TRUE,
                              lower=lower.val,
@@ -66,5 +66,6 @@ makestart.profilenorm.metaplus <- function(yi,sei,mods=NULL,fixed=NULL) {
    names(results) <- thenames
    results <- as.list(results)
  }
+
  return(params=results)
 }
